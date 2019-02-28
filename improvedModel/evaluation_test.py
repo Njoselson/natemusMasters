@@ -1,4 +1,4 @@
-from baseline_model import *
+from improved_model import *
 
 print("Processing training data...")
 _, trainTexts, _ = preprocessData(trainDataPath, mode="train")
