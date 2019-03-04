@@ -4,9 +4,10 @@ from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
 from keras.models import Sequential
-from keras.layers import Dense, Embedding, LSTM
+from keras.layers import Dense, Embedding, LSTM, Input, Concatenate
 from keras import optimizers
-from keras.models import load_model
+from keras.models import load_model, Model
+import pandas as pd
 import emoji
 import json, argparse, os
 import re
@@ -45,11 +46,48 @@ NUM_EPOCHS = config["num_epochs"]
 label2emotion = {0:"others", 1:"happy", 2: "sad", 3:"angry"}
 emotion2label = {"others":0, "happy":1, "sad":2, "angry":3}
 
+######## Helper functions ########################################
+
 def is_emoji(s):
     return s in emoji.UNICODE_EMOJI
 
 def add_space(text):
-    return ''.join(' ' + char if is_emoji(char) else char for char in text).strip()
+    return ''.join(' ' + char + ' ' if is_emoji(char) else char for char in text).strip()
+
+def remove_text(text):
+    words = text.split(' ')
+    emojis = [word for word in words if is_emoji(word)]
+    return emojis
+
+def count_length(text):
+    return len(text)
+
+def count_upper_case(text):
+    return sum(1 for c in text if c.isupper())
+
+##################################################################
+
+def getMetaData(dataFilePath):
+    df = pd.read_csv(dataFilePath, sep='\t')
+
+    #make all turns into one sentence, separete with eos as below
+    df['conv'] = df['turn1'] + ' <eos> ' + df['turn2'] + ' <eos> ' + df['turn3']
+    df.drop(['turn1', 'turn2', 'turn3'], axis=1)
+
+    #extract meta data
+    df['conv'] = df['conv'].apply(add_space)
+    df['emoji'] = df['conv'].apply(remove_text)
+    df['string_lenght'] = df['conv'].apply(count_length)
+    df['number_emojis'] = df['emoji'].apply(count_length)
+    df['number_capitals'] = df['conv'].apply(count_upper_case)
+
+    #correct format
+    string_length = df['string_lenght'].values
+    number_emojis = df['number_emojis'].values
+    number_capitals = df['number_capitals'].values
+    out_matrix = np.column_stack((string_length, number_emojis, number_capitals))
+
+    return out_matrix.astype('int32')
 
 def preprocessData(dataFilePath, mode):
     """Load data from a file, process and return indices, conversations and labels in separate lists
@@ -64,6 +102,9 @@ def preprocessData(dataFilePath, mode):
     indices = []
     conversations = []
     labels = []
+    u1 = []
+    u2 = []
+    u3 = []
     with io.open(dataFilePath, encoding="utf8") as finput:
         finput.readline()
         for line in finput:
@@ -98,13 +139,21 @@ def preprocessData(dataFilePath, mode):
             duplicateSpacePattern = re.compile(r'\ +')
             conv = re.sub(duplicateSpacePattern, ' ', conv)
 
+            u1_line = add_space(line[1])
+            u2_line = add_space(line[2])
+            u3_line = add_space(line[3])
+
+            u1.append(re.sub(duplicateSpacePattern, ' ', u1_line))
+            u2.append(re.sub(duplicateSpacePattern, ' ', u2_line))
+            u3.append(re.sub(duplicateSpacePattern, ' ', u3_line))
+
             indices.append(int(line[0]))
             conversations.append(conv.lower())
 
     if mode == "train":
-        return indices, conversations, labels
+        return indices, conversations, labels, u1, u2, u3
     else:
-        return indices, conversations
+        return indices, conversations, u1, u2, u3
 
 
 def getMetrics(predictions, ground):
@@ -166,33 +215,6 @@ def getMetrics(predictions, ground):
     print("Accuracy : %.4f, Micro Precision : %.4f, Micro Recall : %.4f, Micro F1 : %.4f" % (accuracy, microPrecision, microRecall, microF1))
     return accuracy, microPrecision, microRecall, microF1
 
-
-def writeNormalisedData(dataFilePath, texts):
-    """Write normalised data to a file
-    Input:
-        dataFilePath : Path to original train/test file that has been processed
-        texts : List containing the normalised 3 turn conversations, separated by the <eos> tag.
-    """
-    normalisedDataFilePath = dataFilePath.replace(".txt", "_normalised.txt")
-    with io.open(normalisedDataFilePath, 'w', encoding='utf8') as fout:
-        with io.open(dataFilePath, encoding='utf8') as fin:
-            fin.readline()
-            for lineNum, line in enumerate(fin):
-                line = line.strip().split('\t')
-                normalisedLine = texts[lineNum].strip().split('<eos>')
-                fout.write(line[0] + '\t')
-                # Write the original turn, followed by the normalised version of the same turn
-                fout.write(line[1] + '\t' + normalisedLine[0] + '\t')
-                fout.write(line[2] + '\t' + normalisedLine[1] + '\t')
-                fout.write(line[3] + '\t' + normalisedLine[2] + '\t')
-                try:
-                    # If label information available (train time)
-                    fout.write(line[4] + '\n')
-                except:
-                    # If label information not available (test time)
-                    fout.write('\n')
-
-
 def getEmbeddingMatrix(wordIndex):
     """Populate an embedding matrix using a word-index. If the word "happy" has an index 19,
        the 19th row in the embedding matrix should contain the embedding vector for the word "happy".
@@ -230,37 +252,61 @@ def buildModel(embeddingMatrix):
     Output:
         model : A basic LSTM model
     """
+
+    x1 = Input(shape=(100,), dtype='int32', name='main_input1')
+    x2 = Input(shape=(100,), dtype='int32', name='main_input2')
+    x3 = Input(shape=(100,), dtype='int32', name='main_input3')
+
+    x4 = Input(shape=(3,))
+
+    #LSTM layers
     embeddingLayer = Embedding(embeddingMatrix.shape[0],
                                 EMBEDDING_DIM,
                                 weights=[embeddingMatrix],
                                 input_length=MAX_SEQUENCE_LENGTH,
                                 trainable=False)
-    model = Sequential()
-    model.add(embeddingLayer)
-    model.add(LSTM(LSTM_DIM, dropout=DROPOUT))
-    model.add(Dense(4 , input_shape=(LSTM_DIM, ), activation='sigmoid'))
+    emb1 = embeddingLayer(x1)
+    emb2 = embeddingLayer(x2)
+    emb3 = embeddingLayer(x3)
+
+    lstm = LSTM(LSTM_DIM, dropout=DROPOUT)
+
+    lstm1 = lstm(emb1)
+    lstm2 = lstm(emb2)
+    lstm3 = lstm(emb3)
+
+    #meta data layers
+    meta_out = Dense(3, activation='softmax')(x4)
+
+    #full network
+    concatenated_out = Concatenate(axis=-1)([lstm1, lstm2, lstm3, meta_out])
+    hidden_layer = Dense(12, input_shape=(3*LSTM_DIM + 3, ), activation='softmax')(concatenated_out)
+    model_output = Dense(4, input_shape=(12, ), activation='sigmoid')(hidden_layer)
+    model = Model([x1, x2, x3, x4], model_output)
 
     rmsprop = optimizers.rmsprop(lr=LEARNING_RATE)
+
     model.compile(loss='categorical_crossentropy',
                   optimizer=rmsprop,
                   metrics=['acc'])
+
     return model
 
 
 def main():
     print("Processing training data...")
-    trainIndices, trainTexts, labels = preprocessData(trainDataPath, mode="train")
+    trainIndices, trainTexts, labels, u1_train, u2_train, u3_train = preprocessData(trainDataPath, mode="train")
     # Write normalised text to file to check if normalisation works. Disabled now. Uncomment following line to enable
     # writeNormalisedData(trainDataPath, trainTexts)
     print("Processing test data...")
-    testIndices, testTexts = preprocessData(testDataPath, mode="test")
+    testIndices, testTexts, u1_test, u2_test, u3_test = preprocessData(testDataPath, mode="test")
     # writeNormalisedData(testDataPath, testTexts)
 
     print("Extracting tokens...")
     tokenizer = Tokenizer(num_words=MAX_NB_WORDS)
-    tokenizer.fit_on_texts(trainTexts)
-    trainSequences = tokenizer.texts_to_sequences(trainTexts)
-    testSequences = tokenizer.texts_to_sequences(testTexts)
+    tokenizer.fit_on_texts(u1_train+u2_train+u3_train)
+    u1_trainSequences, u2_trainSequences, u3_trainSequences = tokenizer.texts_to_sequences(u1_train), tokenizer.texts_to_sequences(u2_train), tokenizer.texts_to_sequences(u3_train)
+    u1_testSequences, u2_testSequences, u3_testSequences = tokenizer.texts_to_sequences(u1_test), tokenizer.texts_to_sequences(u2_test), tokenizer.texts_to_sequences(u3_test)
 
     wordIndex = tokenizer.word_index
     print("Found %s unique tokens." % len(wordIndex))
@@ -268,64 +314,41 @@ def main():
     print("Populating embedding matrix...")
     embeddingMatrix = getEmbeddingMatrix(wordIndex)
 
-    data = pad_sequences(trainSequences, maxlen=MAX_SEQUENCE_LENGTH)
+    u1_data = pad_sequences(u1_trainSequences, maxlen=MAX_SEQUENCE_LENGTH)
+    u2_data = pad_sequences(u2_trainSequences, maxlen=MAX_SEQUENCE_LENGTH)
+    u3_data = pad_sequences(u3_trainSequences, maxlen=MAX_SEQUENCE_LENGTH)
     labels = to_categorical(np.asarray(labels))
-    print("Shape of training data tensor: ", data.shape)
+
+    print("Shape of training data tensor: ", u1_data.shape)
     print("Shape of label tensor: ", labels.shape)
+
+    meta_train_data = getMetaData(trainDataPath)
+    meta_test_data = getMetaData(testDataPath)
 
     # Randomize data
     np.random.shuffle(trainIndices)
-    data = data[trainIndices]
+
+    u1_data = u1_data[trainIndices]
+    u2_data = u2_data[trainIndices]
+    u3_data = u3_data[trainIndices]
+    meta_train_data = meta_train_data[trainIndices]
+
     labels = labels[trainIndices]
 
-    # Perform k-fold cross validation
     metrics = {"accuracy" : [],
                "microPrecision" : [],
                "microRecall" : [],
                "microF1" : []}
 
-    print("SKIPPING k-fold cross validation...")
-    # for k in range(NUM_FOLDS):
-    #     print('-'*40)
-    #     print("Fold %d/%d" % (k+1, NUM_FOLDS))
-    #     validationSize = int(len(data)/NUM_FOLDS)
-    #     index1 = validationSize * k
-    #     index2 = validationSize * (k+1)
-    #
-    #     xTrain = np.vstack((data[:index1],data[index2:]))
-    #     yTrain = np.vstack((labels[:index1],labels[index2:]))
-    #     xVal = data[index1:index2]
-    #     yVal = labels[index1:index2]
-    #     print("Building model...")
-    #     model = buildModel(embeddingMatrix)
-    #     model.fit(xTrain, yTrain,
-    #               validation_data=(xVal, yVal),
-    #               epochs=NUM_EPOCHS, batch_size=BATCH_SIZE)
-    #
-    #     predictions = model.predict(xVal, batch_size=BATCH_SIZE)
-    #     accuracy, microPrecision, microRecall, microF1 = getMetrics(predictions, yVal)
-    #     metrics["accuracy"].append(accuracy)
-    #     metrics["microPrecision"].append(microPrecision)
-    #     metrics["microRecall"].append(microRecall)
-    #     metrics["microF1"].append(microF1)
-    #
-    # print("\n============= Metrics =================")
-    # print("Average Cross-Validation Accuracy : %.4f" % (sum(metrics["accuracy"])/len(metrics["accuracy"])))
-    # print("Average Cross-Validation Micro Precision : %.4f" % (sum(metrics["microPrecision"])/len(metrics["microPrecision"])))
-    # print("Average Cross-Validation Micro Recall : %.4f" % (sum(metrics["microRecall"])/len(metrics["microRecall"])))
-    # print("Average Cross-Validation Micro F1 : %.4f" % (sum(metrics["microF1"])/len(metrics["microF1"])))
-    #
-    # print("\n======================================")
-    #
-    # print("Retraining model on entire data to create solution file")
+    print("Building supercool model...")
     model = buildModel(embeddingMatrix)
-    model.fit(data, labels, epochs=NUM_EPOCHS, batch_size=BATCH_SIZE)
-    model.save('EP%d_LR%de-5_LDim%d_BS%d.h5'%(NUM_EPOCHS, int(LEARNING_RATE*(10**5)), LSTM_DIM, BATCH_SIZE))
+    model.fit([u1_data,u2_data,u3_data, meta_train_data], labels, epochs=NUM_EPOCHS, batch_size=BATCH_SIZE)
+    model.save('EP%d_LR%de-5_LDim%d_BS%d_imp.h5'%(NUM_EPOCHS, int(LEARNING_RATE*(10**5)), LSTM_DIM, BATCH_SIZE))
     # model = load_model('EP%d_LR%de-5_LDim%d_BS%d.h5'%(NUM_EPOCHS, int(LEARNING_RATE*(10**5)), LSTM_DIM, BATCH_SIZE))
 
     print("Creating solution file...")
-    testData = pad_sequences(testSequences, maxlen=MAX_SEQUENCE_LENGTH)
-    predictions = model.predict(testData, batch_size=BATCH_SIZE)
+    u1_testData, u2_testData, u3_testData = pad_sequences(u1_testSequences, maxlen=MAX_SEQUENCE_LENGTH), pad_sequences(u2_testSequences, maxlen=MAX_SEQUENCE_LENGTH), pad_sequences(u3_testSequences, maxlen=MAX_SEQUENCE_LENGTH)
+    predictions = model.predict([u1_testData, u2_testData, u3_testData, meta_test_data], batch_size=BATCH_SIZE)
     predictions = predictions.argmax(axis=1)
 
     with io.open(solutionPath, "w", encoding="utf8") as fout:
@@ -338,7 +361,6 @@ def main():
     print("Completed. Model parameters: ")
     print("Learning rate : %.3f, LSTM Dim : %d, Dropout : %.3f, Batch_size : %d"
           % (LEARNING_RATE, LSTM_DIM, DROPOUT, BATCH_SIZE))
-
 
 if __name__ == '__main__':
     main()
