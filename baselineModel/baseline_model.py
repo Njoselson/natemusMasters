@@ -1,12 +1,18 @@
-#Please use python 3.5 or above
+# %% # Baseline Model Revised
+#' This is our baseline model which is a simple LSTM model with only one
+#' LSTM layer. The more specific configurations are listed below.
+
+#+ setup, echo=False
 import numpy as np
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
 from keras.models import Sequential
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.layers import Dense, Embedding, LSTM
 from keras import optimizers
 from keras.models import load_model
+from matplotlib import pyplot
 import emoji
 import json, argparse, os
 import re
@@ -17,16 +23,17 @@ np.random.seed(7)
 
 global trainDataPath, testDataPath, solutionPath, gloveDir
 global NUM_FOLDS, NUM_CLASSES, MAX_NB_WORDS, MAX_SEQUENCE_LENGTH, EMBEDDING_DIM
-global BATCH_SIZE, LSTM_DIM, DROPOUT, NUM_EPOCHS, LEARNING_RATE
+global BATCH_SIZE, LSTM_DIM, DROPOUT, NUM_EPOCHS, LEARNING_RATE, EARLY_STOPPING
 
-parser = argparse.ArgumentParser(description="Baseline Script for SemEval")
-parser.add_argument('-config', help='Config to read details', required=True)
-args = parser.parse_args()
+#parser = argparse.ArgumentParser(description="Baseline Script for SemEval")
+#parser.add_argument('-config', help='Config to read details', required=True)
+#args = parser.parse_args()
 
-with open(args.config) as configfile:
+with open('testBaseline.config') as configfile:
     config = json.load(configfile)
 
 trainDataPath = config["train_data_path"]
+validationDataPath = config["validation_data_path"]
 testDataPath = config["test_data_path"]
 solutionPath = config["solution_path"]
 gloveDir = config["glove_dir"]
@@ -41,10 +48,25 @@ LSTM_DIM = config["lstm_dim"]
 DROPOUT = config["dropout"]
 LEARNING_RATE = config["learning_rate"]
 NUM_EPOCHS = config["num_epochs"]
-
+EARLY_STOPPING = config["early_stopping"]
 label2emotion = {0:"others", 1:"happy", 2: "sad", 3:"angry"}
 emotion2label = {"others":0, "happy":1, "sad":2, "angry":3}
 
+#' ## Config
+#' This model was produced with the following configs:
+
+#+ configs, echo=False
+print('Embedding Dim = %d' %EMBEDDING_DIM)
+print('Batch Size = %d' %BATCH_SIZE)
+print('LSTM Dim = %d' %LSTM_DIM)
+print('Dropout = %d' %DROPOUT)
+print('Learning Rate = %d' %LEARNING_RATE)
+print('Num Epochs = %d' %NUM_EPOCHS)
+print('Early Stopping = ' + EARLY_STOPPING)
+
+
+
+#+ defs, echo=False
 def preprocessData(dataFilePath, mode):
     """Load data from a file, process and return indices, conversations and labels in separate lists
     Input:
@@ -213,7 +235,9 @@ def getEmbeddingMatrix(wordIndex):
 
     return embeddingMatrix
 
+#' # Model Specification
 
+#+ model, echo=True
 def buildModel(embeddingMatrix):
     """Constructs the architecture of the model
     Input:
@@ -237,20 +261,25 @@ def buildModel(embeddingMatrix):
                   metrics=['acc'])
     return model
 
+#' # Model Training + Evaluation
 
+#+ models, echo=False
 def main():
     print("Processing training data...")
     trainIndices, trainTexts, labels = preprocessData(trainDataPath, mode="train")
     # Write normalised text to file to check if normalisation works. Disabled now. Uncomment following line to enable
     # writeNormalisedData(trainDataPath, trainTexts)
-    print("Processing test data...")
-    testIndices, testTexts = preprocessData(testDataPath, mode="test")
+    print("Processing validation data...")
+    validationIndices, validationTexts, validationLabels = preprocessData(validationDataPath, mode="train")
     # writeNormalisedData(testDataPath, testTexts)
+    print("Processing test data...")
+    testIndices, testTexts, testLabels = preprocessData(testDataPath, mode="train")
 
     print("Extracting tokens...")
     tokenizer = Tokenizer(num_words=MAX_NB_WORDS)
     tokenizer.fit_on_texts(trainTexts)
     trainSequences = tokenizer.texts_to_sequences(trainTexts)
+    validationSequences = tokenizer.texts_to_sequences(validationTexts)
     testSequences = tokenizer.texts_to_sequences(testTexts)
 
     wordIndex = tokenizer.word_index
@@ -261,6 +290,10 @@ def main():
 
     data = pad_sequences(trainSequences, maxlen=MAX_SEQUENCE_LENGTH)
     labels = to_categorical(np.asarray(labels))
+    validationData = pad_sequences(validationSequences, maxlen=MAX_SEQUENCE_LENGTH)
+    validationLabels = to_categorical(np.asarray(validationLabels))
+    testData = pad_sequences(testSequences, maxlen=MAX_SEQUENCE_LENGTH)
+    testLabels = to_categorical(np.asarray(testLabels))
     print("Shape of training data tensor: ", data.shape)
     print("Shape of label tensor: ", labels.shape)
 
@@ -268,6 +301,11 @@ def main():
     np.random.shuffle(trainIndices)
     data = data[trainIndices]
     labels = labels[trainIndices]
+
+    # Randomize validation data
+    np.random.shuffle(validationIndices)
+    validationData = validationData[validationIndices]
+    validationLabels = validationLabels[validationIndices]
 
     # Perform k-fold cross validation
     metrics = {"accuracy" : [],
@@ -309,14 +347,24 @@ def main():
     # print("\n======================================")
     #
     # print("Retraining model on entire data to create solution file")
-    model = buildModel(embeddingMatrix)
-    model.fit(data, labels, epochs=NUM_EPOCHS, batch_size=BATCH_SIZE)
-    model.save('EP%d_LR%de-5_LDim%d_BS%d.h5'%(NUM_EPOCHS, int(LEARNING_RATE*(10**5)), LSTM_DIM, BATCH_SIZE))
-    # model = load_model('EP%d_LR%de-5_LDim%d_BS%d.h5'%(NUM_EPOCHS, int(LEARNING_RATE*(10**5)), LSTM_DIM, BATCH_SIZE))
+    if EARLY_STOPPING=='True':
+        es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=3)
+        mc = ModelCheckpoint('EP%d_LR%de-5_LDim%d_BS%d.h5'%(NUM_EPOCHS, int(LEARNING_RATE*(10**5)), LSTM_DIM, BATCH_SIZE), monitor='val_acc', mode='max', verbose=1, save_best_only=True)
+        # fit model
+        model = buildModel(embeddingMatrix)
+        history = model.fit(data, labels, validation_data=(validationData, validationLabels), epochs=NUM_EPOCHS, batch_size=BATCH_SIZE, verbose=0, callbacks=[es, mc])
+    else:
+        # fit model
+        model = buildModel(embeddingMatrix)
+        model.fit(data, labels, validation_data=(validationData, validationLabels), epochs=NUM_EPOCHS, batch_size=BATCH_SIZE, verbose=1)
+        model.save('EP%d_LR%de-5_LDim%d_BS%d.h5'%(NUM_EPOCHS, int(LEARNING_RATE*(10**5)), LSTM_DIM, BATCH_SIZE))
+        #model = load_model('EP%d_LR%de-5_LDim%d_BS%d.h5'%(NUM_EPOCHS, int(LEARNING_RATE*(10**5)), LSTM_DIM, BATCH_SIZE))
+
+    print("Evaluating on Test Data...")
+    predictions = model.predict(testData, batch_size=BATCH_SIZE)
+    accuracy, microPrecision, microRecall, microF1 = getMetrics(predictions, testLabels)
 
     print("Creating solution file...")
-    testData = pad_sequences(testSequences, maxlen=MAX_SEQUENCE_LENGTH)
-    predictions = model.predict(testData, batch_size=BATCH_SIZE)
     predictions = predictions.argmax(axis=1)
 
     with io.open(solutionPath, "w", encoding="utf8") as fout:
@@ -330,6 +378,10 @@ def main():
     print("Learning rate : %.3f, LSTM Dim : %d, Dropout : %.3f, Batch_size : %d"
           % (LEARNING_RATE, LSTM_DIM, DROPOUT, BATCH_SIZE))
 
+    pyplot.plot(history.history['loss'], label='train')
+    pyplot.plot(history.history['val_loss'], label='test')
+    pyplot.legend()
+    pyplot.show()
 
 if __name__ == '__main__':
     main()
