@@ -26,7 +26,7 @@ print("Loading model...")
 model = load_model('EP5_LR300e-5_LDim128_BS200_imp.h5')
 
 print("Make predictions...")
-predictions = model.predict([u1_data, u2_data, u3_data, meta_data], batch_size=BATCH_SIZE)
+predictions = model.predict([u1_data, u2_data, u3_data], batch_size=BATCH_SIZE)
 labels = to_categorical(np.array(labels))
 
 accuracy, microPrecision, microRecall, microF1 = getMetrics(predictions, labels)
