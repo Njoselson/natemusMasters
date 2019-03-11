@@ -7,8 +7,8 @@ from keras.models import Sequential
 from keras.layers import Dense, Embedding, LSTM, Input, Concatenate
 from keras import optimizers
 from keras.models import load_model, Model
+from helper_functions import *
 import pandas as pd
-import emoji
 import json, argparse, os
 import re
 import io
@@ -45,27 +45,6 @@ NUM_EPOCHS = config["num_epochs"]
 
 label2emotion = {0:"others", 1:"happy", 2: "sad", 3:"angry"}
 emotion2label = {"others":0, "happy":1, "sad":2, "angry":3}
-
-######## Helper functions ########################################
-
-def is_emoji(s):
-    return s in emoji.UNICODE_EMOJI
-
-def add_space(text):
-    return ''.join(' ' + char + ' ' if is_emoji(char) else char for char in text).strip()
-
-def remove_text(text):
-    words = text.split(' ')
-    emojis = [word for word in words if is_emoji(word)]
-    return emojis
-
-def count_length(text):
-    return len(text)
-
-def count_upper_case(text):
-    return sum(1 for c in text if c.isupper())
-
-##################################################################
 
 def getMetaData(dataFilePath):
     df = pd.read_csv(dataFilePath, sep='\t')
@@ -132,20 +111,27 @@ def preprocessData(dataFilePath, mode):
 
             conv = ' <eos> '.join(line[1:4])
 
-            #Separate smilys
+            #Replace non-unicode smilys with unicode
+            #conv = str2emoji(conv)
+
+            #Separate smilys w unicode
             conv = add_space(conv)
+
+            #Many of the words not in embeddings are problematic due to apostrophes e.g. didn't
+            #conv = fix_apos(conv)
 
             # Remove any duplicate spaces
             duplicateSpacePattern = re.compile(r'\ +')
             conv = re.sub(duplicateSpacePattern, ' ', conv)
 
-            u1_line = add_space(line[1])
-            u2_line = add_space(line[2])
-            u3_line = add_space(line[3])
+            #Do the same operations for each turn, remake from before
+            u1_line = conv.split(' <eos> ')[0]
+            u2_line = conv.split(' <eos> ')[1]
+            u3_line = conv.split(' <eos> ')[2]
 
-            u1.append(re.sub(duplicateSpacePattern, ' ', u1_line))
-            u2.append(re.sub(duplicateSpacePattern, ' ', u2_line))
-            u3.append(re.sub(duplicateSpacePattern, ' ', u3_line))
+            u1.append(re.sub(duplicateSpacePattern, ' ', u1_line.lower()))
+            u2.append(re.sub(duplicateSpacePattern, ' ', u2_line.lower()))
+            u3.append(re.sub(duplicateSpacePattern, ' ', u3_line.lower()))
 
             indices.append(int(line[0]))
             conversations.append(conv.lower())
@@ -250,14 +236,12 @@ def buildModel(embeddingMatrix):
     Input:
         embeddingMatrix : The embedding matrix to be loaded in the embedding layer.
     Output:
-        model : A basic LSTM model
+        model : three layer lstm model with one layer of meta data
     """
 
     x1 = Input(shape=(100,), dtype='int32', name='main_input1')
     x2 = Input(shape=(100,), dtype='int32', name='main_input2')
     x3 = Input(shape=(100,), dtype='int32', name='main_input3')
-
-    x4 = Input(shape=(3,))
 
     #LSTM layers
     embeddingLayer = Embedding(embeddingMatrix.shape[0],
@@ -276,15 +260,17 @@ def buildModel(embeddingMatrix):
     lstm3 = lstm(emb3)
 
     #meta data layers
-    meta_out = Dense(3, activation='softmax')(x4)
+    meta_out = Dense(3, activation='linear')
 
     #full network
-    concatenated_out = Concatenate(axis=-1)([lstm1, lstm2, lstm3, meta_out])
-    hidden_layer = Dense(12, input_shape=(3*LSTM_DIM + 3, ), activation='softmax')(concatenated_out)
-    model_output = Dense(4, input_shape=(12, ), activation='sigmoid')(hidden_layer)
-    model = Model([x1, x2, x3, x4], model_output)
+    concatenated_out = Concatenate(axis=-1)([lstm1, lstm2, lstm3])
+    model_output = Dense(4, activation='sigmoid')(concatenated_out)
+    model = Model([x1, x2, x3], model_output)
 
     rmsprop = optimizers.rmsprop(lr=LEARNING_RATE)
+
+    #alternative optimizer
+    adam = optimizers.adam(lr=0.03)
 
     model.compile(loss='categorical_crossentropy',
                   optimizer=rmsprop,
@@ -342,13 +328,13 @@ def main():
 
     print("Building supercool model...")
     model = buildModel(embeddingMatrix)
-    model.fit([u1_data,u2_data,u3_data, meta_train_data], labels, epochs=NUM_EPOCHS, batch_size=BATCH_SIZE)
+    model.fit([u1_data,u2_data,u3_data], labels, epochs=NUM_EPOCHS, batch_size=BATCH_SIZE)
     model.save('EP%d_LR%de-5_LDim%d_BS%d_imp.h5'%(NUM_EPOCHS, int(LEARNING_RATE*(10**5)), LSTM_DIM, BATCH_SIZE))
     # model = load_model('EP%d_LR%de-5_LDim%d_BS%d.h5'%(NUM_EPOCHS, int(LEARNING_RATE*(10**5)), LSTM_DIM, BATCH_SIZE))
 
     print("Creating solution file...")
     u1_testData, u2_testData, u3_testData = pad_sequences(u1_testSequences, maxlen=MAX_SEQUENCE_LENGTH), pad_sequences(u2_testSequences, maxlen=MAX_SEQUENCE_LENGTH), pad_sequences(u3_testSequences, maxlen=MAX_SEQUENCE_LENGTH)
-    predictions = model.predict([u1_testData, u2_testData, u3_testData, meta_test_data], batch_size=BATCH_SIZE)
+    predictions = model.predict([u1_testData, u2_testData, u3_testData], batch_size=BATCH_SIZE)
     predictions = predictions.argmax(axis=1)
 
     with io.open(solutionPath, "w", encoding="utf8") as fout:
