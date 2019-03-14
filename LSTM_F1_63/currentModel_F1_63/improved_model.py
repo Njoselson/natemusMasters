@@ -15,8 +15,6 @@ import re
 import io
 import sys
 
-
-
 global trainDataPath, testDataPath, solutionPath, gloveDir
 global NUM_FOLDS, NUM_CLASSES, MAX_NB_WORDS, MAX_SEQUENCE_LENGTH, EMBEDDING_DIM
 global BATCH_SIZE, LSTM_DIM, DROPOUT, NUM_EPOCHS, LEARNING_RATE
@@ -113,10 +111,13 @@ def preprocessData(dataFilePath, mode):
             conv = ' <eos> '.join(line[1:4])
 
             #Replace non-unicode smilys with unicode
-            #conv = str2emoji(conv)
+            conv = str2emoji(conv)
 
             #Separate smilys w unicode
             conv = add_space(conv)
+
+            #KILL emojis
+            #conv = remove_emoji(conv)
 
             #Many of the words not in embeddings are problematic due to apostrophes e.g. didn't
             #conv = fix_apos(conv)
@@ -250,6 +251,7 @@ def buildModel(embeddingMatrix):
                                 weights=[embeddingMatrix],
                                 input_length=MAX_SEQUENCE_LENGTH,
                                 trainable=False)
+
     emb1 = embeddingLayer(x1)
     emb2 = embeddingLayer(x2)
     emb3 = embeddingLayer(x3)
