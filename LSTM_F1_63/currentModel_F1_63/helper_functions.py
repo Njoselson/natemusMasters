@@ -4,6 +4,10 @@ import re
 def is_emoji(s):
     return s in emoji.UNICODE_EMOJI
 
+def remove_emoji(text):
+    letter_array = [char for char in text if not is_emoji(char)]
+    return ''.join(letter_array)
+
 def add_space(text):
     return ''.join(' ' + char + ' ' if is_emoji(char) else char for char in text).strip()
 
