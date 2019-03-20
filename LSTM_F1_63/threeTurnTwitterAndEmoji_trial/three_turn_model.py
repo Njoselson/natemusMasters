@@ -12,7 +12,7 @@ from keras.preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
 from keras.models import Sequential
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-from keras.layers import Dense, Embedding, LSTM, Input, Concatenate, Dropout
+from keras.layers import Dense, Embedding, LSTM, Input, Concatenate, Dropout, Bidirectional, Reshape, Flatten
 from keras import optimizers
 from keras.models import load_model, Model
 from matplotlib import pyplot
@@ -302,13 +302,9 @@ def buildModel(embeddingMatrix, smileyEmbeddings):
                                 EMBEDDING_DIM,
                                 weights=[embeddingMatrix],
                                 input_length=MAX_SEQUENCE_LENGTH,
-                                trainable=False)
+                                trainable=True)
 
-    smileyEmbeddingLayer = Embedding(smileyEmbeddings.shape[0],
-                                300,
-                                weights=[smileyEmbeddings],
-                                input_length=20,
-                                trainable=False)
+    smileyEmbeddingLayer = Embedding(smileyEmbeddings.shape[0], 300, weights=[smileyEmbeddings], input_length=20, trainable=True)
 
     emb1 = embeddingLayer(x1)
     emb2 = embeddingLayer(x2)
@@ -318,22 +314,24 @@ def buildModel(embeddingMatrix, smileyEmbeddings):
     emb_smiley = smileyEmbeddingLayer(smiley_input)
 
     #LSTM layers, need to define a new one for different embeddings
-    lstm = LSTM(LSTM_DIM, dropout=DROPOUT)
+    lstm = Bidirectional(LSTM(LSTM_DIM, dropout=DROPOUT, return_sequences=True))
     lstm_smiley = LSTM(LSTM_DIM, dropout=0.2)
 
     lstm1 = lstm(emb1)
     lstm2 = lstm(emb2)
     lstm3 = lstm(emb3)
 
-    lstm_smiley = lstm_smiley(emb_smiley)
+    lstm4 = lstm_smiley(emb_smiley)
 
     #full network
-    concatenated_out = Concatenate(axis=-1)([lstm1, lstm2, lstm3])
+    concatenated_lstm = Concatenate(axis=-1)([lstm1, lstm2, lstm3])
+    reshaped_lstm = Flatten()(concatenated_lstm)
+
+    concatenated_smiley = Concatenate(axis=-1)([reshaped_lstm, lstm4])
 
     #cool hidden
-    hidden_layer = Dense(512, activation='relu')(concatenated_out)
-    concatenate_emoji = Concatenate(axis=-1)([hidden_layer, lstm_smiley])
-    dropout = Dropout(0.2)(concatenate_emoji)
+    hidden_layer = Dense(256, activation='relu')(concatenated_smiley)
+    dropout = Dropout(0.2)(hidden_layer)
 
     #output
     model_output = Dense(4, activation='sigmoid')(dropout)
@@ -343,7 +341,7 @@ def buildModel(embeddingMatrix, smileyEmbeddings):
     adam =  optimizers.adam(lr=LEARNING_RATE)
 
     model.compile(loss='categorical_crossentropy',
-                  optimizer=adam,
+                  optimizer=rmsprop,
                   metrics=['acc'])
 
     return model

@@ -103,3 +103,4 @@ venv.bak/
 # mypy
 .mypy_cache/
 .DS_Store
+bcLSTM_F1_XX/b_smileyTwitter_F1_XX/EP100_LR100e-5_LDim128_BS200.h5
