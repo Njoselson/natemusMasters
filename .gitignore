@@ -103,3 +103,9 @@ venv.bak/
 # mypy
 .mypy_cache/
 .DS_Store
+
+# ignore hdf5 files
+*.hdf
+*.h5
+*.hdf5
+*.he5
