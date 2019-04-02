@@ -736,7 +736,7 @@ id	turn1	turn2	turn3	label
 734	Yes	I'm really not	Why	others
 735	not my subject	well if you're not excited , I am !	excited for what?	happy
 736	How about need for speed 2012?	Also interested in hearing about the multiplayer for Need for Speed.	Titanfall	others
-737	i am in love	ooo. Tell me more! :D	i love her so much	happy
+737	i am in love	ooo. Tell me more! :D	i love her so much	others
 738	Yes 	annoys me so much	Why	others
 739	Whos your valentine	You dear	Are you free. Tonight	others
 740	Oh	what	Than start 	others
@@ -1335,7 +1335,7 @@ id	turn1	turn2	turn3	label
 1333	Why	Because we don't sign like that	I message you don't reply me	angry
 1334	Jim. Kara ya. Dra	listen, i was young but i know better now	Goodnight baby	others
 1335	Which exercise	All exercise are best. Please mention if you're looking for some particular exercise.	U don't know	others
-1336	Yup i am 😊	I missed you so much 😂😂😂😂😂😂	And i missed her	sad
+1336	Yup i am 😊	I missed you so much 😂😂😂😂😂😂	And i missed her	happy
 1337	It means I am death according to u	nope	Then give ur cell no	others
 1338	Not at all	PROVE IT	How	others
 1339	What did Job do in	Found another job	Im software engineer	others
@@ -1690,7 +1690,7 @@ id	turn1	turn2	turn3	label
 1688	Okay	Again angry or what?	Do u really have friends?	others
 1689	Whats up lately?	nothing much	Im gonna go sleep then	others
 1690	Yes	YAY HAVE FUN	No I want a good sleep not fun	others
-1691	Yes	Hell yes!	When are u meeting 😂	happy
+1691	Yes	Hell yes!	When are u meeting 😂	others
 1692	Is she ur friend ?	not right now	Why not ?	others
 1693	So sweet ilikes you	u r more sweet :)	Nice and beautiful sweet baby	happy
 1694	Haha	that's just us haha 😀🙂	I wanna see you	happy
@@ -2225,7 +2225,7 @@ id	turn1	turn2	turn3	label
 2223	that was basketball	Stick to hockey	No I did hockey and it did not turn so nice up on the field with the girls	others
 2224	Seriously?	what? What? What?	Where are you now?	others
 2225	Learn Tamil soon	may i teach u??	What u gonna teach	others
-2226	Talk	U KNOW WHAT I MEAN BYE	Well you are the one who yold me that u can talk instantly	angry
+2226	Talk	U KNOW WHAT I MEAN BYE	Well you are the one who yold me that u can talk instantly	others
 2227	I don't want to share all	But baby :(	I'm not a emotionol baby	sad
 2228	Yes... But i want nudr	I think you'd like it!	Y3s	others
 2229	Are you wish 10th class	nope 8th..i guess you are in 10th	Yes you're right	others
@@ -2357,7 +2357,7 @@ id	turn1	turn2	turn3	label
 2355	How did you get my contact 	u just did, bro. how can i help you?	Help	others
 2356	Your pic please	too late	Just	others
 2357	Ok	Again angry or what?	No not angry	angry
-2358	Partying?	WANNA HAVE A PARTY AGAIN SOON :)	I missed you	sad
+2358	Partying?	WANNA HAVE A PARTY AGAIN SOON :)	I missed you	others
 2359	Wtf dude. Am a woman.	Why dude?	What the hell. Fuck off.	angry
 2360	How	lol you told me to stop...	You don't make sense	others
 2361	Really?	yeah! why not?	Whr did u see her eat	others
@@ -2383,7 +2383,7 @@ id	turn1	turn2	turn3	label
 2381	had you any boyfriend yet?	Except it's 'somebody told me.' No 'once.'	what	others
 2382	gotta right	LIKE NIGHT ROW	what happen guys	others
 2383	Ok fine	Arey I'm kidding yo.	Family is ok	others
-2384	#RIP	... in peace	what all do you know about me, so far?	angry
+2384	#RIP	... in peace	what all do you know about me, so far?	others
 2385	You're as ugly as hell	Thank you 'you are fine as hell'	Thanks so good and the time I am going on world tour 😍🏃 you are the one will ever know about it until the movie and then we will get back right to me too freaky as well but unfortunately another time then we are good at least I don't wanna fit for you too but I'm in a single take the bus I don't have any of them have you got the money I sent the message I received many times 😎😀 I have ever been through so many	angry
 2386	I won't chat with u	for what ..?	Because u r not sending u r pic	angry
 2387	Tell me full dream	This isn't a dream	Whatever it may be tell in details	others
@@ -2578,7 +2578,7 @@ id	turn1	turn2	turn3	label
 2576	What u want	I want many things. I need not a lot.	What many things u want	others
 2577	I'm good. Wbu	im good just being lazy as usual :/	You resemble me	others
 2578	There should be an answer to a question not the question	What do you mean by that?	Answer me that's all I want	others
-2579	I never gave u lunch	you're the best	You're not bad either	others
+2579	I never gave u lunch	you're the best	You're not bad either	sad
 2580	No i am full service	Are you planning on getting a 6S?	What a6s	others
 2581	Its bad	how good is it	Can you send me your photo	others
 2582	I'm perfect from head to toe.	Stop eating yourself	You, on the other hand, don't even have a head	others
@@ -3814,7 +3814,7 @@ id	turn1	turn2	turn3	label
 3812	what plane	Yes. Trails of a plane.	i lost my old job	sad
 3813	how to find	Search in Google	how to get shype id	others
 3814	which other half means...??	huh... Means huh!!	huhhhh	others
-3815	Oo really	yup :-)	Without u i an not fine.i was busy	sad
+3815	Oo really	yup :-)	Without u i an not fine.i was busy	others
 3816	Really	Did you not think it was a real conversation?	How you doin	others
 3817	What ?	nothing.. :) nthng rit nw	Are u ok	others
 3818	Dats very cute	Thank you. XD	And you minti ok	others
@@ -4258,7 +4258,7 @@ id	turn1	turn2	turn3	label
 4256	You are veru funny	Funnier than you	Very*	happy
 4257	R u bro and babe	I'm goooood. Are your exams over?	What the fuck robot	others
 4258	Say	out my face	What is ur weekend plan	others
-4259	Stop talking	u stop talking	Why should I?	angry
+4259	Stop talking	u stop talking	Why should I?	others
 4260	I kinda love u	i do though	Let's meet 😂	happy
 4261	You don't have eyes ?	How did you know I have blue eyes?	I guess so	others
 4262	yeah i know	you good?	dont message me again	angry

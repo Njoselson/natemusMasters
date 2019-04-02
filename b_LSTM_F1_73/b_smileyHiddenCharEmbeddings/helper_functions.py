@@ -1,5 +1,15 @@
 import emoji
 import re
+import numpy as np
+
+def pad_array(matrix, pad_len):
+    pad_diff = pad_len - matrix.shape[0]
+    if pad_diff < 0:
+        pad_diff = pad_len
+    max_pad = np.zeros((pad_diff, matrix.shape[1]))
+    padded_matrix = np.concatenate((matrix, max_pad), axis=0)
+    padded_matrix = padded_matrix[0:pad_len,:]
+    return padded_matrix
 
 def is_emoji(s):
     return s in emoji.UNICODE_EMOJI
