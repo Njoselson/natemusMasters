@@ -12,7 +12,7 @@ from keras.preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
 from keras.models import Sequential
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-from keras.layers import Dense, Embedding, LSTM, Input, Concatenate, Dropout, Bidirectional, Reshape, Flatten
+from keras.layers import Dense, Embedding, LSTM, Input, Concatenate, Dropout, Bidirectional, Reshape, Flatten, TimeDistributed
 from keras import optimizers
 from keras.models import load_model, Model
 from matplotlib import pyplot
@@ -29,6 +29,8 @@ from helper_functions import *
 global trainDataPath, testDataPath, solutionPath, gloveDir
 global NUM_FOLDS, NUM_CLASSES, MAX_NB_WORDS, MAX_SEQUENCE_LENGTH, EMBEDDING_DIM
 global BATCH_SIZE, LSTM_DIM, DROPOUT, NUM_EPOCHS, LEARNING_RATE, EARLY_STOPPING
+# For char embeddings
+global CHAR_MAX_LEN
 
 #parser = argparse.ArgumentParser(description="Baseline Script for SemEval")
 #parser.add_argument('-config', help='Config to read details', required=True)
@@ -54,6 +56,7 @@ DROPOUT = config["dropout"]
 LEARNING_RATE = config["learning_rate"]
 NUM_EPOCHS = config["num_epochs"]
 EARLY_STOPPING = config["early_stopping"]
+CHAR_MAX_LEN = config["padding_characters"]
 label2emotion = {0:"others", 1:"happy", 2: "sad", 3:"angry"}
 emotion2label = {"others":0, "happy":1, "sad":2, "angry":3}
 
@@ -68,8 +71,6 @@ print('Dropout = %d' %DROPOUT)
 print('Learning Rate = %d' %LEARNING_RATE)
 print('Num Epochs = %d' %NUM_EPOCHS)
 print('Early Stopping = ' + EARLY_STOPPING)
-
-
 
 #+ defs, echo=False
 
@@ -90,6 +91,9 @@ def preprocessData(dataFilePath, mode):
     u2 = []
     u3 = []
     smileys = []
+    raw1 = []
+    raw2 = []
+    raw3 = []
 
     with io.open(dataFilePath, encoding="utf8") as finput:
         finput.readline()
@@ -99,6 +103,15 @@ def preprocessData(dataFilePath, mode):
             # okay???sure -> okay ? sure
             # Add whitespace around such punctuation
             # okay!sure -> okay ! sure
+
+            # Char embeddings in
+            fix_emoji_line = str2emoji(line)
+            splitted_line = fix_emoji_line.strip().split('\t')
+
+            raw1.append(splitted_line[1])
+            raw2.append(splitted_line[2])
+            raw3.append(splitted_line[3])
+
             repeatedChars = ['.', '?', '!', ',']
             for c in repeatedChars:
                 lineSplit = line.split(c)
@@ -148,9 +161,9 @@ def preprocessData(dataFilePath, mode):
             conversations.append(conv.lower())
 
     if mode == "train":
-        return indices, conversations, labels, u1, u2, u3, smileys
+        return indices, conversations, labels, u1, u2, u3, smileys, raw1, raw2, raw3
     else:
-        return indices, conversations, u1, u2, u3, smileys
+        return indices, conversations, u1, u2, u3, smileys, raw1, raw2, raw3
 
 
 def getMetrics(predictions, ground):
@@ -267,26 +280,68 @@ def getSmileyEmbeddings(wordIndex):
 
     return smileyEmbeddings
 #############################################
-###### This is for char embeddings ##########
 
+####### THIS IS FOR THE CHARACTERS
 def padded_char_vectors(u1, u2, u3):
-    tk = Tokenizer(num_words=None, char_level=True, oov_token='UNK')
+    tk = Tokenizer(num_words=None, char_level=True, oov_token='UNK', lower=False)
     tk.fit_on_texts(u1+u2+u3)
-    alphabet = "abcdefghijklmnopqrstuvwxyz0123456789,;.!?:'\"/\\|_@#$%^&*~`+-=<>()[]{}"
+    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789,;.!?:'\"/\\|_@#$%^&*~`+-=<>()[]{}"
     char_dict = {}
+    t1 = {}
+    t2 = {}
+    t3 = {}
+    word_list_t1 = []
+    word_list_t2 = []
+    word_list_t3 = []
+    padded_seq_t1 = []
+    padded_seq_t2 = []
+    padded_seq_t3 = []
+
+    #keras stuff for fixing dict
     for i, char in enumerate(alphabet):
         char_dict[char] = i + 1
     tk.word_index = char_dict.copy()
     tk.word_index[tk.oov_token] = max(char_dict.values()) + 1
-    train_sequences1 = tk.texts_to_sequences(u1)
-    train_sequences2 = tk.texts_to_sequences(u2)
-    train_sequences3 = tk.texts_to_sequences(u3)
-    padded_seq1 = pad_sequences(train_sequences1, maxlen=50)
-    padded_seq2 = pad_sequences(train_sequences2, maxlen=50)
-    padded_seq3 = pad_sequences(train_sequences3, maxlen=50)
-    return padded_seq1, padded_seq2, padded_seq3
 
-#############################################
+    #crazy stupid looping to get everything on the right shape
+    #for text_to_sequences you want a list of lists of each letter per word per sentence
+    for k, sentence in enumerate(u1):
+        t1[k] = sentence.split(' ')
+        t1[k] = [list(word) for word in t1[k]]
+    for k, sentence in enumerate(u2):
+        t2[k] = sentence.split(' ')
+        t2[k] = [list(word) for word in t2[k]]
+    for k, sentence in enumerate(u3):
+        t3[k] = sentence.split(' ')
+        t3[k] = [list(word) for word in t3[k]]
+
+    #remaking to list of list
+    for key in t1:
+        word_list_t1.append(t1[key])
+    for key in t2:
+        word_list_t2.append(t2[key])
+    for key in t3:
+        word_list_t3.append(t3[key])
+
+    #pad the right things
+    for word_per_turn in word_list_t1:
+        seq_t1 = tk.texts_to_sequences(word_per_turn)
+        padded1 = pad_sequences(seq_t1, maxlen=CHAR_MAX_LEN)
+        padded_seq_t1.append(pad_array(padded1, CHAR_MAX_LEN))
+
+    for word_per_turn in word_list_t2:
+        seq_t2 = tk.texts_to_sequences(word_per_turn)
+        padded2 = pad_sequences(seq_t2, maxlen=CHAR_MAX_LEN)
+        padded_seq_t2.append(pad_array(padded2, CHAR_MAX_LEN))
+
+    for word_per_turn in word_list_t3:
+        seq_t3 = tk.texts_to_sequences(word_per_turn)
+        padded3 = pad_sequences(seq_t3, maxlen=CHAR_MAX_LEN)
+        padded_seq_t3.append(pad_array(padded3, CHAR_MAX_LEN))
+
+    return np.asarray(padded_seq_t1), np.asarray(padded_seq_t2), np.asarray(padded_seq_t3)
+    ####################
+
 
 #' # Model Specification
 #' # An extra hidden layer which is supposed to extract the important information from the
@@ -295,21 +350,29 @@ def padded_char_vectors(u1, u2, u3):
 #+ model, echo=True
 def buildModel(embeddingMatrix, smileyEmbeddings):
     """Constructs the architecture of the model
-    Input:
-        embeddingMatrix : The embedding matrix to be loaded in the embedding layer.
-    Output:
-        model : three layer lstm model with one layer of meta data
+
     """
 
     x1 = Input(shape=(100,), dtype='int32', name='main_input1')
     x2 = Input(shape=(100,), dtype='int32', name='main_input2')
     x3 = Input(shape=(100,), dtype='int32', name='main_input3')
-
     smiley_input = Input(shape=(20,), dtype='int32', name='main_input4')
 
-    char_inp1 = Input(shape=(50,), dtype='int32')
-    char_inp2 = Input(shape=(50,), dtype='int32')
-    char_inp3 = Input(shape=(50,), dtype='int32')
+    char_input1 = Input(shape=(CHAR_MAX_LEN,None,))
+    char_input2 = Input(shape=(CHAR_MAX_LEN,None,))
+    char_input3 = Input(shape=(CHAR_MAX_LEN,None,))
+    #Length of our tokenizer.word_index for chars is 95, inc UNK
+    embedded_char = TimeDistributed(Embedding(96,
+                              CHAR_MAX_LEN,
+                              input_length=CHAR_MAX_LEN,
+                              trainable=True))
+
+    embedded_char1 = embedded_char(char_input1)
+    embedded_char2 = embedded_char(char_input2)
+    embedded_char3 = embedded_char(char_input3)
+    char_emb1 = TimeDistributed(Bidirectional(LSTM(units=32, return_sequences=False, recurrent_dropout=0.2)))(embedded_char1)
+    char_emb2 = TimeDistributed(Bidirectional(LSTM(units=32, return_sequences=False, recurrent_dropout=0.2)))(embedded_char2)
+    char_emb3 = TimeDistributed(Bidirectional(LSTM(units=32, return_sequences=False, recurrent_dropout=0.2)))(embedded_char3)
 
     #pretrained embedding layers
     embeddingLayer = Embedding(embeddingMatrix.shape[0],
@@ -320,13 +383,6 @@ def buildModel(embeddingMatrix, smileyEmbeddings):
 
     smileyEmbeddingLayer = Embedding(smileyEmbeddings.shape[0], 300, weights=[smileyEmbeddings], input_length=20, trainable=True)
 
-    #char emb layer
-    charEmbeddings = Embedding(70, 30, input_length=50, trainable=True)
-    emb_char1 = charEmbeddings(char_inp1)
-    emb_char2 = charEmbeddings(char_inp2)
-    emb_char3 = charEmbeddings(char_inp3)
-
-    #clean embeddings
     emb1 = embeddingLayer(x1)
     emb2 = embeddingLayer(x2)
     emb3 = embeddingLayer(x3)
@@ -336,34 +392,37 @@ def buildModel(embeddingMatrix, smileyEmbeddings):
 
     #LSTM layers, need to define a new one for different embeddings
     lstm = Bidirectional(LSTM(LSTM_DIM, dropout=DROPOUT, return_sequences=True))
-    lstm_char = Bidirectional(LSTM(LSTM_DIM, dropout=0.2), merge_mode='concat')
+    lstm_char = Bidirectional(LSTM(LSTM_DIM, dropout=DROPOUT, return_sequences=True))
     lstm_smiley = LSTM(LSTM_DIM, dropout=0.2)
 
     lstm1 = lstm(emb1)
     lstm2 = lstm(emb2)
     lstm3 = lstm(emb3)
 
-    lstm_smil = lstm_smiley(emb_smiley)
+    lstm4 = lstm_smiley(emb_smiley)
 
-    lstm5 = lstm_char(emb_char1)
-    lstm6 = lstm_char(emb_char2)
-    lstm7 = lstm_char(emb_char3)
+    lstm_char1 = lstm_char(char_emb1)
+    lstm_char2 = lstm_char(char_emb2)
+    lstm_char3 = lstm_char(char_emb3)
 
     #full network
     concatenated_lstm = Concatenate(axis=-1)([lstm1, lstm2, lstm3])
     reshaped_lstm = Flatten()(concatenated_lstm)
 
-    conc_char_lstm = Concatenate(axis=-1)([lstm5, lstm6, lstm7])
+    concatenated_chars = Concatenate(axis=-1)([lstm_char1, lstm_char2, lstm_char3])
+    concatenated_chars = Flatten()(concatenated_chars)
 
-    concatenated_smiley_char = Concatenate(axis=-1)([reshaped_lstm, lstm_smil, conc_char_lstm])
+    #awesome char lstm
+    concatenated_smiley_char = Concatenate(axis=-1)([reshaped_lstm, lstm4, concatenated_chars])
+    concatenated_smiley_char = Dropout(DROPOUT)(concatenated_smiley_char)
 
     #cool hidden
-    hidden_layer = Dense(256, activation='relu')(concatenated_smiley_char)
-    dropout = Dropout(0.2)(hidden_layer)
+    hidden_layer = Dense(320, activation='relu')(concatenated_smiley_char)
+    dropout = Dropout(DROPOUT)(hidden_layer)
 
     #output
     model_output = Dense(4, activation='sigmoid')(dropout)
-    model = Model([x1, x2, x3, smiley_input, char_inp1, char_inp2, char_inp3], model_output)
+    model = Model([x1, x2, x3, smiley_input, char_input1, char_input2, char_input3], model_output)
 
     rmsprop = optimizers.rmsprop(lr=LEARNING_RATE)
     adam =  optimizers.adam(lr=LEARNING_RATE)
@@ -379,14 +438,14 @@ def buildModel(embeddingMatrix, smileyEmbeddings):
 #+ models, echo=False
 def main():
     print("Processing training data...")
-    trainIndices, trainTexts, labels, u1_train, u2_train, u3_train, smil_train = preprocessData(trainDataPath, mode="train")
+    trainIndices, trainTexts, labels, u1_train, u2_train, u3_train, smil_train, r1_train, r2_train, r3_train = preprocessData(trainDataPath, mode="train")
     # Write normalised text to file to check if normalisation works. Disabled now. Uncomment following line to enable
     # writeNormalisedData(trainDataPath, trainTexts)
     print("Processing validation data...")
-    validationIndices, validationTexts, validationLabels, u1_val, u2_val, u3_val, smil_val = preprocessData(validationDataPath, mode="train")
+    validationIndices, validationTexts, validationLabels, u1_val, u2_val, u3_val, smil_val, r1_val, r2_val, r3_val = preprocessData(validationDataPath, mode="train")
     # writeNormalisedData(testDataPath, testTexts)
     print("Processing test data...")
-    testIndices, testTexts, testLabels, u1_test, u2_test, u3_test, smil_test = preprocessData(testDataPath, mode="train")
+    testIndices, testTexts, testLabels, u1_test, u2_test, u3_test, smil_test, r1_test, r2_test, r3_test = preprocessData(testDataPath, mode="train")
 
     print("Extracting tokens...")
     tokenizer = Tokenizer(num_words=MAX_NB_WORDS)
@@ -398,9 +457,20 @@ def main():
     wordIndex = tokenizer.word_index
     print("Found %s unique tokens." % len(wordIndex))
 
+    print("Sorting char matrices")
+    r1_train, r2_train, r3_train = padded_char_vectors(r1_train, r2_train, r3_train)
+    r1_val, r2_val, r3_val = padded_char_vectors(r1_val, r2_val, r3_val)
+    r1_test, r2_test, r3_test = padded_char_vectors(r1_test, r2_test, r3_test)
+
     print("Populating embedding matrix...")
-    embeddingMatrix = getEmbeddingMatrix(wordIndex)
-    smileyEmbeddings = getSmileyEmbeddings(wordIndex)
+    #embeddingMatrix = getEmbeddingMatrix(wordIndex)
+    embeddingMatrix = np.zeros((14613,200))
+    #smileyEmbeddings = getSmileyEmbeddings(wordIndex)
+    smileyEmbeddings = np.zeros((14613,300))
+    print("twitter shape: ")
+    print(embeddingMatrix.shape)
+    print("smilemb shape: ")
+    print(smileyEmbeddings.shape)
 
     u1_data = pad_sequences(u1_trainSequences, maxlen=MAX_SEQUENCE_LENGTH)
     u2_data = pad_sequences(u2_trainSequences, maxlen=MAX_SEQUENCE_LENGTH)
@@ -435,30 +505,21 @@ def main():
     smiley_test = smil_valData
     smiley_trial = smil_data[trainIndices]
 
-    char1, char2, char3 = padded_char_vectors(u1_train, u2_train, u3_train)
-    char1 = char1[trainIndices]
-    char2 = char2[trainIndices]
-    char3 = char3[trainIndices]
-
-    char_val1, char_val2, char_val3 = padded_char_vectors(u1_val, u2_val, u3_val)
-
-    class_weight = {0: 1., 1: 2., 2.: 2., 3: 2.}
-
     if EARLY_STOPPING=='True':
-        es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=2)
+        es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=3)
         mc = ModelCheckpoint('EP%d_LR%de-5_LDim%d_BS%d.h5'%(NUM_EPOCHS, int(LEARNING_RATE*(10**5)), LSTM_DIM, BATCH_SIZE), monitor='val_loss', mode='min', verbose=1, save_best_only=True)
         # fit model
         model = buildModel(embeddingMatrix, smileyEmbeddings)
-        history = model.fit([u1_data,u2_data,u3_data, smiley_trial, char1, char2, char3], labels, validation_data=([u1_valData,u2_valData,u3_valData, smiley_test, char_val1, char_val2, char_val3], validationLabels), epochs=NUM_EPOCHS, batch_size=BATCH_SIZE, verbose=2, callbacks=[es, mc], class_weight=class_weight)
+        history = model.fit([u1_data,u2_data,u3_data, smiley_trial, r1_train, r2_train, r3_train], labels, validation_data=([u1_valData,u2_valData,u3_valData, smiley_test, r1_val, r2_val, r3_val], validationLabels), epochs=NUM_EPOCHS, batch_size=BATCH_SIZE, verbose=2, callbacks=[es, mc])
     else:
         model = buildModel(embeddingMatrix, smileyEmbeddings)
-        model.fit([u1_data,u2_data,u3_data, smiley_trial, char1, char2, char3], labels, epochs=NUM_EPOCHS, batch_size=BATCH_SIZE)
+        model.fit([u1_data,u2_data,u3_data, smiley_trial], labels, epochs=NUM_EPOCHS, batch_size=BATCH_SIZE)
         model.save('EP%d_LR%de-5_LDim%d_BS%d.h5'%(NUM_EPOCHS, int(LEARNING_RATE*(10**5)), LSTM_DIM, BATCH_SIZE))
 
 
     print("Evaluating on Test Data...")
     model = load_model('EP%d_LR%de-5_LDim%d_BS%d.h5'%(NUM_EPOCHS, int(LEARNING_RATE*(10**5)), LSTM_DIM, BATCH_SIZE))
-    predictions = model.predict([u1_testData, u2_testData, u3_testData, smil_testData], batch_size=BATCH_SIZE)
+    predictions = model.predict([u1_testData, u2_testData, u3_testData, smil_testData, r1_test, r2_test, r3_test], batch_size=BATCH_SIZE)
     accuracy, microPrecision, microRecall, microF1 = getMetrics(predictions, testLabels)
 
     print("Creating solution file...")
