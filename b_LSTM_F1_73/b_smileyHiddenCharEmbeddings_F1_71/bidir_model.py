@@ -12,7 +12,7 @@ from keras.preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
 from keras.models import Sequential
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-from keras.layers import Dense, Embedding, LSTM, Input, Concatenate, Dropout, Bidirectional, Reshape, Flatten, TimeDistributed
+from keras.layers import Dense, Embedding, LSTM, Input, Concatenate, Dropout, Bidirectional, Reshape, Flatten, TimeDistributed, Conv2D, Conv1D
 from keras import optimizers
 from keras.models import load_model, Model
 from matplotlib import pyplot
@@ -356,23 +356,28 @@ def buildModel(embeddingMatrix, smileyEmbeddings):
     x1 = Input(shape=(100,), dtype='int32', name='main_input1')
     x2 = Input(shape=(100,), dtype='int32', name='main_input2')
     x3 = Input(shape=(100,), dtype='int32', name='main_input3')
+
     smiley_input = Input(shape=(20,), dtype='int32', name='main_input4')
 
-    char_input1 = Input(shape=(CHAR_MAX_LEN,None,))
-    char_input2 = Input(shape=(CHAR_MAX_LEN,None,))
-    char_input3 = Input(shape=(CHAR_MAX_LEN,None,))
+    char_input1 = Input(shape=(CHAR_MAX_LEN,CHAR_MAX_LEN))
+    char_input2 = Input(shape=(CHAR_MAX_LEN,CHAR_MAX_LEN))
+    char_input3 = Input(shape=(CHAR_MAX_LEN,CHAR_MAX_LEN))
     #Length of our tokenizer.word_index for chars is 95, inc UNK
-    embedded_char = TimeDistributed(Embedding(96,
-                              CHAR_MAX_LEN,
-                              input_length=CHAR_MAX_LEN,
-                              trainable=True))
+    # embedded_char = Embedding(96,
+    #                           CHAR_MAX_LEN,
+    #                           trainable=True)
+    #
+    # embedded_char1 = embedded_char(char_input1)
+    # embedded_char2 = embedded_char(char_input2)
+    # embedded_char3 = embedded_char(char_input3)
 
-    embedded_char1 = embedded_char(char_input1)
-    embedded_char2 = embedded_char(char_input2)
-    embedded_char3 = embedded_char(char_input3)
-    char_emb1 = TimeDistributed(Bidirectional(LSTM(units=32, return_sequences=False, recurrent_dropout=0.2)))(embedded_char1)
-    char_emb2 = TimeDistributed(Bidirectional(LSTM(units=32, return_sequences=False, recurrent_dropout=0.2)))(embedded_char2)
-    char_emb3 = TimeDistributed(Bidirectional(LSTM(units=32, return_sequences=False, recurrent_dropout=0.2)))(embedded_char3)
+    conv_char = Conv1D(16, kernel_size=4, strides=2, padding='same', activation='relu', input_shape =(32,32) )
+    lstm_char = Bidirectional(LSTM(32, recurrent_dropout=0.2, return_sequences=True))
+
+    char_conv1 = conv_char(char_input1)
+    char_conv2 = conv_char(char_input2)
+    char_conv3 = conv_char(char_input3)
+    conc_char_conv = Concatenate(axis=-1)([char_input1, char_input2, char_input3])
 
     #pretrained embedding layers
     embeddingLayer = Embedding(embeddingMatrix.shape[0],
@@ -391,9 +396,9 @@ def buildModel(embeddingMatrix, smileyEmbeddings):
     emb_smiley = smileyEmbeddingLayer(smiley_input)
 
     #LSTM layers, need to define a new one for different embeddings
-    lstm = Bidirectional(LSTM(LSTM_DIM, dropout=DROPOUT, return_sequences=True))
-    lstm_char = Bidirectional(LSTM(LSTM_DIM, dropout=DROPOUT, return_sequences=True))
-    lstm_smiley = LSTM(LSTM_DIM, dropout=0.2)
+    lstm = Bidirectional(LSTM(LSTM_DIM, recurrent_dropout=DROPOUT, return_sequences=True))
+    lstm_char = Bidirectional(LSTM(LSTM_DIM, recurrent_dropout=DROPOUT, return_sequences=True))
+    lstm_smiley = LSTM(LSTM_DIM, recurrent_dropout=DROPOUT)
 
     lstm1 = lstm(emb1)
     lstm2 = lstm(emb2)
@@ -401,23 +406,19 @@ def buildModel(embeddingMatrix, smileyEmbeddings):
 
     lstm4 = lstm_smiley(emb_smiley)
 
-    lstm_char1 = lstm_char(char_emb1)
-    lstm_char2 = lstm_char(char_emb2)
-    lstm_char3 = lstm_char(char_emb3)
+    lstm_char = lstm_char(conc_char_conv)
+    lstm_char = Flatten()(lstm_char)
 
     #full network
     concatenated_lstm = Concatenate(axis=-1)([lstm1, lstm2, lstm3])
     reshaped_lstm = Flatten()(concatenated_lstm)
 
-    concatenated_chars = Concatenate(axis=-1)([lstm_char1, lstm_char2, lstm_char3])
-    concatenated_chars = Flatten()(concatenated_chars)
-
     #awesome char lstm
-    concatenated_smiley_char = Concatenate(axis=-1)([reshaped_lstm, lstm4, concatenated_chars])
+    concatenated_smiley_char = Concatenate(axis=-1)([reshaped_lstm, lstm4, lstm_char])
     concatenated_smiley_char = Dropout(DROPOUT)(concatenated_smiley_char)
 
     #cool hidden
-    hidden_layer = Dense(320, activation='relu')(concatenated_smiley_char)
+    hidden_layer = Dense(256, activation='relu')(concatenated_smiley_char)
     dropout = Dropout(DROPOUT)(hidden_layer)
 
     #output
@@ -463,10 +464,10 @@ def main():
     r1_test, r2_test, r3_test = padded_char_vectors(r1_test, r2_test, r3_test)
 
     print("Populating embedding matrix...")
-    #embeddingMatrix = getEmbeddingMatrix(wordIndex)
-    embeddingMatrix = np.zeros((14613,200))
-    #smileyEmbeddings = getSmileyEmbeddings(wordIndex)
-    smileyEmbeddings = np.zeros((14613,300))
+    embeddingMatrix = getEmbeddingMatrix(wordIndex)
+    #embeddingMatrix = np.zeros((14613,200))
+    smileyEmbeddings = getSmileyEmbeddings(wordIndex)
+    #smileyEmbeddings = np.zeros((14613,300))
     print("twitter shape: ")
     print(embeddingMatrix.shape)
     print("smilemb shape: ")
@@ -510,6 +511,7 @@ def main():
         mc = ModelCheckpoint('EP%d_LR%de-5_LDim%d_BS%d.h5'%(NUM_EPOCHS, int(LEARNING_RATE*(10**5)), LSTM_DIM, BATCH_SIZE), monitor='val_loss', mode='min', verbose=1, save_best_only=True)
         # fit model
         model = buildModel(embeddingMatrix, smileyEmbeddings)
+        print(model.summary())
         history = model.fit([u1_data,u2_data,u3_data, smiley_trial, r1_train, r2_train, r3_train], labels, validation_data=([u1_valData,u2_valData,u3_valData, smiley_test, r1_val, r2_val, r3_val], validationLabels), epochs=NUM_EPOCHS, batch_size=BATCH_SIZE, verbose=2, callbacks=[es, mc])
     else:
         model = buildModel(embeddingMatrix, smileyEmbeddings)

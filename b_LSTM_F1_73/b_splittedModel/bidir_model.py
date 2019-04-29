@@ -2,11 +2,10 @@
 #' This is an improvement to our smiley separation
 #' which now takes the 3 turns as separate inputs
 #' into the LSTM layers.
-#' rasmus created another config for exprementation
+
 
 #+ setup, echo=False
 import numpy as np
-import pandas as pd
 np.random.seed(7)
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
@@ -16,8 +15,8 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.layers import Dense, Embedding, LSTM, Input, Concatenate, Dropout, Bidirectional, Reshape, Flatten
 from keras import optimizers
 from keras.models import load_model, Model
-from keras import callbacks
 from matplotlib import pyplot
+import pandas as pd
 import emoji
 import json, argparse, os
 import re
@@ -44,6 +43,10 @@ validationDataPath = config["validation_data_path"]
 testDataPath = config["test_data_path"]
 solutionPath = config["solution_path"]
 gloveDir = config["glove_dir"]
+
+trainOther = config["binary_train"]
+testOther = config["binary_test"]
+valOther = config["binary_val"]
 
 NUM_FOLDS = config["num_folds"]
 NUM_CLASSES = config["num_classes"]
@@ -74,92 +77,31 @@ print('Early Stopping = ' + EARLY_STOPPING)
 
 
 #+ defs, echo=False
-class BatchLossHistory(callbacks.Callback):
-    def on_train_begin(self, logs={}):
-        self.losses = []
-        self.val_losses = []
 
-    def on_batch_end(self, batch, logs={}):
-        logs['val_loss_batch'] = logs.get('val_loss')     
+def preprocessData(dir):
+    df = pd.read_csv(dir, sep='\t')
 
-def preprocessData(dataFilePath, mode):
-    """Load data from a file, process and return indices, conversations and labels in separate lists
-    Input:
-        dataFilePath : Path to train/test file to be processed
-        mode : "train" mode returns labels. "test" mode doesn't return labels.
-    Output:
-        indices : Unique conversation ID list
-        conversations : List of 3 turn conversations, processed and each turn separated by the <eos> tag
-        labels : [Only available in "train" mode] List of labels
-    """
-    indices = []
-    conversations = []
-    labels = []
-    u1 = []
-    u2 = []
-    u3 = []
-    smileys = []
+    df.label = df.label.apply(other_or_emo)
+    labels = df.label.tolist()
 
-    with io.open(dataFilePath, encoding="utf8") as finput:
-        finput.readline()
-        for line in finput:
-            # Convert multiple instances of . ? ! , to single instance
-            # okay...sure -> okay . sure
-            # okay???sure -> okay ? sure
-            # Add whitespace around such punctuation
-            # okay!sure -> okay ! sure
-            repeatedChars = ['.', '?', '!', ',']
-            for c in repeatedChars:
-                lineSplit = line.split(c)
-                while True:
-                    try:
-                        lineSplit.remove('')
-                    except:
-                        break
-                cSpace = ' ' + c + ' '
-                line = cSpace.join(lineSplit)
+    df['t1_len'] = df['turn1'].apply(count_length)
+    df['t2_len'] = df['turn2'].apply(count_length)
+    df['t3_len'] = df['turn3'].apply(count_length)
 
-            line = line.strip().split('\t')
-            if mode == "train":
-                # Train data contains id, 3 turns and label
-                label = emotion2label[line[4]]
-                labels.append(label)
+    df['t1_upper'] = df['turn1'].apply(count_upper_case)
+    df['t2_upper'] = df['turn2'].apply(count_upper_case)
+    df['t3_upper'] = df['turn3'].apply(count_upper_case)
 
-            conv = ' <eos> '.join(line[1:4])
+    df['turn1'] = df['turn1'].apply(str2emoji).apply(remove_emoji).apply(lambda x: x.lower()).apply(preprocessString)
+    df['turn2'] = df['turn2'].apply(str2emoji).apply(remove_emoji).apply(lambda x: x.lower()).apply(preprocessString)
+    df['turn3'] = df['turn3'].apply(str2emoji).apply(remove_emoji).apply(lambda x: x.lower()).apply(preprocessString)
 
-            #Replace non-unicode smilys with unicode
-            conv = str2emoji(conv)
+    ind = df.id.tolist()
 
-            #Separate smilys w unicode
-            conv = add_space(conv)
-
-            #Many of the words not in embeddings are problematic due to apostrophes e.g. didn't
-            conv = fix_apos(conv)
-
-            #Remove any duplicate spaces
-            duplicateSpacePattern = re.compile(r'\ +')
-            conv = re.sub(duplicateSpacePattern, ' ', conv)
-
-            #Find all smilys as array of strings
-            row_smileys = remove_text(conv)
-
-            #Do the same operations for each turn
-            u1_line = conv.split(' <eos> ')[0]
-            u2_line = conv.split(' <eos> ')[1]
-            u3_line = conv.split(' <eos> ')[2]
-
-            u1.append(re.sub(duplicateSpacePattern, ' ', u1_line.lower()))
-            u2.append(re.sub(duplicateSpacePattern, ' ', u2_line.lower()))
-            u3.append(re.sub(duplicateSpacePattern, ' ', u3_line.lower()))
-            smileys.append(row_smileys)
-
-            indices.append(int(line[0]))
-            conversations.append(conv.lower())
-
-    if mode == "train":
-        return indices, conversations, labels, u1, u2, u3, smileys
-    else:
-        return indices, conversations, u1, u2, u3, smileys
+    t1, t2, t3 = df.turn1.tolist(), df.turn2.tolist(), df.turn3.tolist()
+    len1, len2, len3 = df.t1_len.tolist(), df.t3_len.tolist(), df.t3_len.tolist()
+    case1, case2, case3 = df.t1_upper.tolist(), df.t2_upper.tolist(), df.t3_upper.tolist()
+    return ind, labels, t1, t2, t3, len1, len2, len3, case1, case2, case3
 
 
 def getMetrics(predictions, ground):
@@ -282,7 +224,7 @@ def getSmileyEmbeddings(wordIndex):
 #' # first embedding then add information from smilys
 
 #+ model, echo=True
-def buildModel(embeddingMatrix, smileyEmbeddings):
+def buildModel(embeddingMatrix):
     """Constructs the architecture of the model
     Input:
         embeddingMatrix : The embedding matrix to be loaded in the embedding layer.
@@ -290,26 +232,27 @@ def buildModel(embeddingMatrix, smileyEmbeddings):
         model : three layer lstm model with one layer of meta data
     """
 
-    x1 = Input(shape=(100,), dtype='int32', name='main_input1')
-    x2 = Input(shape=(100,), dtype='int32', name='main_input2')
-    x3 = Input(shape=(100,), dtype='int32', name='main_input3')
-    smiley_input = Input(shape=(20,), dtype='int32', name='main_input4')
+    t1 = Input(shape=(100,), dtype='int32', name='conv_turn_1')
+    t2 = Input(shape=(100,), dtype='int32', name='conv_turn_2')
+    t3 = Input(shape=(100,), dtype='int32', name='conv_turn_3')
 
-    #pretrained embedding layers
-    embeddingLayer = Embedding(embeddingMatrix.shape[0],
-                                EMBEDDING_DIM,
-                                weights=[embeddingMatrix],
-                                input_length=MAX_SEQUENCE_LENGTH,
-                                trainable=True)
+    len1 = Input()
+    len2 = Input()
+    len3 = Input()
 
-    smileyEmbeddingLayer = Embedding(smileyEmbeddings.shape[0], 300, weights=[smileyEmbeddings], input_length=20, trainable=True)
+    case1 = Input()
+    case2 = Input()
+    case3 = Input()
 
-    emb1 = embeddingLayer(x1)
-    emb2 = embeddingLayer(x2)
-    emb3 = embeddingLayer(x3)
+    ########## Conversation layer, biggest ##########
+    twitterEmbeddings = Embedding(embeddingMatrix.shape[0], EMBEDDING_DIM, weights=[embeddingMatrix], input_length=MAX_SEQUENCE_LENGTH, trainable=True)
 
-    #smiley embeddings
-    emb_smiley = smileyEmbeddingLayer(smiley_input)
+    emb1 = twitterEmbeddings(t1)
+    emb2 = twitterEmbeddings(t2)
+    emb3 = twitterEmbeddings(t3)
+
+    ################################################
+
 
     #LSTM layers, need to define a new one for different embeddings
     lstm = Bidirectional(LSTM(LSTM_DIM, dropout=DROPOUT, return_sequences=True))
@@ -333,7 +276,7 @@ def buildModel(embeddingMatrix, smileyEmbeddings):
 
     #output
     model_output = Dense(4, activation='sigmoid')(dropout)
-    model = Model([x1, x2, x3, smiley_input], model_output)
+    model = Model([t1, t2, t3, len1, len2, len3, case1, case2, case3], model_output)
 
     rmsprop = optimizers.rmsprop(lr=LEARNING_RATE)
     adam =  optimizers.adam(lr=LEARNING_RATE)
@@ -348,79 +291,60 @@ def buildModel(embeddingMatrix, smileyEmbeddings):
 
 #+ models, echo=False
 def main():
-    print("Processing training data...")
-    trainIndices, trainTexts, labels, u1_train, u2_train, u3_train, smil_train = preprocessData(trainDataPath, mode="train")
-    # Write normalised text to file to check if normalisation works. Disabled now. Uncomment following line to enable
-    # writeNormalisedData(trainDataPath, trainTexts)
-    print("Processing validation data...")
-    validationIndices, validationTexts, validationLabels, u1_val, u2_val, u3_val, smil_val = preprocessData(validationDataPath, mode="train")
-    # writeNormalisedData(testDataPath, testTexts)
-    print("Processing test data...")
-    testIndices, testTexts, testLabels, u1_test, u2_test, u3_test, smil_test = preprocessData(testDataPath, mode="train")
+    print("Import new dataframe")
+    #use new pandas dataframe with binary classification
+    ind, labels, t1, t2, t3, len1, len2, len3, case1, case2, case3 = preprocessData(trainDataPath)
+    ind_val, validationLabels, t1_val, t2_val, t3_val, len1_val, len2_val, len3_val, case1_val, case2_val, case3_val = preprocessData(validationDataPath)
+    ind_test, testLabels, t1_test, t2_test, t3_test, len1_test, len2_test, len3_test, case1_test, case2_test, case3_test = preprocessData(testDataPath)
 
     print("Extracting tokens...")
     tokenizer = Tokenizer(num_words=MAX_NB_WORDS)
-    tokenizer.fit_on_texts(u1_train+u2_train+u3_train)
-    u1_trainSequences, u2_trainSequences, u3_trainSequences, smil_trainSeq = tokenizer.texts_to_sequences(u1_train), tokenizer.texts_to_sequences(u2_train), tokenizer.texts_to_sequences(u3_train), tokenizer.texts_to_sequences(smil_train)
-    u1_valSequences, u2_valSequences, u3_valSequences, smil_valSeq = tokenizer.texts_to_sequences(u1_val), tokenizer.texts_to_sequences(u2_val), tokenizer.texts_to_sequences(u3_val), tokenizer.texts_to_sequences(smil_val)
-    u1_testSequences, u2_testSequences, u3_testSequences, smil_testSeq = tokenizer.texts_to_sequences(u1_test), tokenizer.texts_to_sequences(u2_test), tokenizer.texts_to_sequences(u3_test), tokenizer.texts_to_sequences(smil_test)
-
+    tokenizer.fit_on_texts(t1+t2+t3)
     wordIndex = tokenizer.word_index
-    print("Found %s unique tokens." % len(wordIndex))
+
+    t1, t2, t3 = tokenizer.texts_to_sequences(t1), tokenizer.texts_to_sequences(t2), tokenizer.texts_to_sequences(t3)
+    t1_val, t2_val, t3_val = tokenizer.texts_to_sequences(t1_val), tokenizer.texts_to_sequences(t2_val), tokenizer.texts_to_sequences(t3_val)
+    t1_test, t2_test, t3_test = tokenizer.texts_to_sequences(t1_test), tokenizer.texts_to_sequences(t2_test), tokenizer.texts_to_sequences(t3_test)
+
+    print("Pad everything")
+    t1, t2, t3 = pad_sequences(t1, maxlen=MAX_SEQUENCE_LENGTH), pad_sequences(t2, maxlen=MAX_SEQUENCE_LENGTH), pad_sequences(t3, maxlen=MAX_SEQUENCE_LENGTH)
+    t1_val, t2_val, t3_val = pad_sequences(t1_val, maxlen=MAX_SEQUENCE_LENGTH), pad_sequences(t2_val, maxlen=MAX_SEQUENCE_LENGTH), pad_sequences(t3_val, maxlen=MAX_SEQUENCE_LENGTH)
+    t1_test, t2_test, t3_test = pad_sequences(t1_test, maxlen=MAX_SEQUENCE_LENGTH), pad_sequences(t2_test, maxlen=MAX_SEQUENCE_LENGTH), pad_sequences(t3_test, maxlen=MAX_SEQUENCE_LENGTH)
+
+    labels = to_categorical(np.asarray(labels))
+    validationLabels = to_categorical(np.asarray(validationLabels))
+    testLabels = to_categorical(np.asarray(testLabels))
 
     print("Populating embedding matrix...")
     embeddingMatrix = getEmbeddingMatrix(wordIndex)
     smileyEmbeddings = getSmileyEmbeddings(wordIndex)
-
-    u1_data = pad_sequences(u1_trainSequences, maxlen=MAX_SEQUENCE_LENGTH)
-    u2_data = pad_sequences(u2_trainSequences, maxlen=MAX_SEQUENCE_LENGTH)
-    u3_data = pad_sequences(u3_trainSequences, maxlen=MAX_SEQUENCE_LENGTH)
-    smil_data = pad_sequences(smil_trainSeq, maxlen=20)
-    labels = to_categorical(np.asarray(labels))
-    u1_valData = pad_sequences(u1_valSequences, maxlen=MAX_SEQUENCE_LENGTH)
-    u2_valData = pad_sequences(u2_valSequences, maxlen=MAX_SEQUENCE_LENGTH)
-    u3_valData = pad_sequences(u3_valSequences, maxlen=MAX_SEQUENCE_LENGTH)
-    smil_valData = pad_sequences(smil_valSeq, maxlen=20)
-    validationLabels = to_categorical(np.asarray(validationLabels))
-    u1_testData = pad_sequences(u1_testSequences, maxlen=MAX_SEQUENCE_LENGTH)
-    u2_testData = pad_sequences(u2_testSequences, maxlen=MAX_SEQUENCE_LENGTH)
-    u3_testData = pad_sequences(u3_testSequences, maxlen=MAX_SEQUENCE_LENGTH)
-    smil_testData = pad_sequences(smil_testSeq, maxlen=20)
-    testLabels = to_categorical(np.asarray(testLabels))
+    print(embeddingMatrix.shape)
     print("Shape of training data tensor: ", u1_data.shape)
     print("Shape of label tensor: ", labels.shape)
 
     # Randomize data
-    np.random.shuffle(trainIndices)
-    u1_data = u1_data[trainIndices]
-    u2_data = u2_data[trainIndices]
-    u3_data = u3_data[trainIndices]
-    labels = labels[trainIndices]
-    metrics = {"accuracy" : [],
-               "microPrecision" : [],
-               "microRecall" : [],
-               "microF1" : []}
+    np.random.shuffle(ind)
+    t1 = t1[ind]
+    t2 = t2[ind]
+    t3 = t3[ind]
+    case1 = [case1[i] for i in ind]
+    case2 = [case2[i] for i in ind]
+    case3 = [case3[i] for i in ind]
+    len1 = [len1[i] for i in ind]
+    len2 = [len2[i] for i in ind]
+    len3 = [len3[i] for i in ind]
+    labels = labels[ind]
+    metrics = {"accuracy" : [], "microPrecision" : [], "microRecall" : [], "microF1" : []}
 
-
-    smiley_test = smil_valData
-    smiley_trial = smil_data[trainIndices]
-
-    if EARLY_STOPPING=='True':
-        batch_loss = BatchLossHistory()
-        es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=3)
-        mc = ModelCheckpoint('EP%d_LR%de-5_LDim%d_BS%d.h5'%(NUM_EPOCHS, int(LEARNING_RATE*(10**5)), LSTM_DIM, BATCH_SIZE), monitor='val_loss', mode='min', verbose=1, save_best_only=True)
-        # fit model
-        model = buildModel(embeddingMatrix, smileyEmbeddings)
-        history = model.fit([u1_data,u2_data,u3_data, smiley_trial], labels, validation_data=([u1_valData,u2_valData,u3_valData, smiley_test], validationLabels), epochs=NUM_EPOCHS, batch_size=BATCH_SIZE, verbose=2, callbacks=[es, mc, batch_loss])
-    else:
-        model = buildModel(embeddingMatrix, smileyEmbeddings)
-        model.fit([u1_data,u2_data,u3_data, smiley_trial], labels, epochs=NUM_EPOCHS, batch_size=BATCH_SIZE)
-        model.save('EP%d_LR%de-5_LDim%d_BS%d.h5'%(NUM_EPOCHS, int(LEARNING_RATE*(10**5)), LSTM_DIM, BATCH_SIZE))
-
+    print("Set up mo.. mod... mod..EL.. MODEL MOOODEEEL")
+    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=1)
+    mc = ModelCheckpoint('EP%d_LR%de-5_LDim%d_BS%d.h5'%(NUM_EPOCHS, int(LEARNING_RATE*(10**5)), LSTM_DIM, BATCH_SIZE), monitor='val_loss', mode='min', verbose=1, save_best_only=True)
+    model = buildModel(embeddingMatrix, smileyEmbeddings)
+    history = model.fit([t1, t2, t3, len1, len2, len3, case1, case2, case3], labels, validation_data=([t1_val, t2_val, t3_val, len1_val, len2_val, len3_val, case1_val, case2_val, case3_val], validationLabels), epochs=NUM_EPOCHS, batch_size=BATCH_SIZE, verbose=2, callbacks=[es, mc])
 
     print("Evaluating on Test Data...")
     model = load_model('EP%d_LR%de-5_LDim%d_BS%d.h5'%(NUM_EPOCHS, int(LEARNING_RATE*(10**5)), LSTM_DIM, BATCH_SIZE))
-    predictions = model.predict([u1_testData, u2_testData, u3_testData, smil_testData], batch_size=BATCH_SIZE)
+    predictions = model.predict([t1_test, t2_test, t3_test, len1_test, len2_test, len3_test, case1_test, case2_test, case3_test], batch_size=BATCH_SIZE)
     accuracy, microPrecision, microRecall, microF1 = getMetrics(predictions, testLabels)
 
     print("Creating solution file...")

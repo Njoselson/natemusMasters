@@ -469,7 +469,7 @@ def buildModel(embeddingMatrix, smileyEmbeddings):
 
     #output
     model_output = Dense(4, activation='sigmoid')(concatenated_smiley_char)
-    model = Model([x1, x2, x3, smiley_input, char_input1, char_input2, char_input3], model_output)
+
     #####################################
 
 
@@ -480,6 +480,8 @@ def buildModel(embeddingMatrix, smileyEmbeddings):
     rmsprop = optimizers.rmsprop(lr=LEARNING_RATE)
     adam = optimizers.adam(lr=LEARNING_RATE)
     Nadam = optimizers.Nadam(lr=LEARNING_RATE)
+
+    model = Model([x1, x2, x3, smiley_input, char_input1, char_input2, char_input3], model_output)
 
     model.compile(loss='categorical_crossentropy',
                   optimizer=Nadam,
