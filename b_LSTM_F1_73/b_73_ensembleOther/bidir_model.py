@@ -10,10 +10,13 @@ import pandas as pd
 np.random.seed(7)
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
+from keras.regularizers import l2
+from keras.constraints import max_norm
 from keras.utils import to_categorical
 from keras.models import Sequential
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.layers import Dense, Embedding, LSTM, Input, Concatenate, Dropout, Bidirectional, Reshape, Flatten
+from keras.layers.normalization import BatchNormalization
 from keras import optimizers
 from keras.models import load_model, Model
 from keras import callbacks
@@ -25,6 +28,7 @@ import io
 import sys
 sys.path.append(os.getcwd())
 from helper_functions import *
+from other_no_other import *
 
 
 
@@ -36,7 +40,7 @@ global BATCH_SIZE, LSTM_DIM, DROPOUT, NUM_EPOCHS, LEARNING_RATE, EARLY_STOPPING
 #parser.add_argument('-config', help='Config to read details', required=True)
 #args = parser.parse_args()
 
-with open('testBaseline.config') as configfile:
+with open('test.config') as configfile:
     config = json.load(configfile)
 
 trainDataPath = config["train_data_path"]
@@ -80,7 +84,7 @@ class BatchLossHistory(callbacks.Callback):
         self.val_losses = []
 
     def on_batch_end(self, batch, logs={}):
-        logs['val_loss_batch'] = logs.get('val_loss')     
+        logs['val_loss_batch'] = logs.get('val_loss')
 
 def preprocessData(dataFilePath, mode):
     """Load data from a file, process and return indices, conversations and labels in separate lists
@@ -300,20 +304,26 @@ def buildModel(embeddingMatrix, smileyEmbeddings):
                                 EMBEDDING_DIM,
                                 weights=[embeddingMatrix],
                                 input_length=MAX_SEQUENCE_LENGTH,
-                                trainable=True)
+                                trainable=True,
+                                activity_regularizer=l2(0.02))
 
-    smileyEmbeddingLayer = Embedding(smileyEmbeddings.shape[0], 300, weights=[smileyEmbeddings], input_length=20, trainable=True)
+    smileyEmbeddingLayer = Embedding(smileyEmbeddings.shape[0], 300, weights=[smileyEmbeddings], input_length=20, trainable=True, activity_regularizer=l2(0.02))
 
     emb1 = embeddingLayer(x1)
     emb2 = embeddingLayer(x2)
     emb3 = embeddingLayer(x3)
 
+    emb1 = Dropout(DROPOUT)(emb1)
+    emb2 = Dropout(DROPOUT)(emb2)
+    emb3 = Dropout(DROPOUT)(emb3)
+
     #smiley embeddings
     emb_smiley = smileyEmbeddingLayer(smiley_input)
+    emb_smiley = Dropout(DROPOUT)(emb_smiley)
 
     #LSTM layers, need to define a new one for different embeddings
-    lstm = Bidirectional(LSTM(LSTM_DIM, dropout=DROPOUT, return_sequences=True))
-    lstm_smiley = LSTM(LSTM_DIM, dropout=0.2)
+    lstm = Bidirectional(LSTM(LSTM_DIM, dropout=DROPOUT, return_sequences=True, activity_regularizer=l2(0.02)))
+    lstm_smiley = LSTM(LSTM_DIM, dropout=DROPOUT)
 
     lstm1 = lstm(emb1)
     lstm2 = lstm(emb2)
@@ -328,7 +338,8 @@ def buildModel(embeddingMatrix, smileyEmbeddings):
     concatenated_smiley = Concatenate(axis=-1)([reshaped_lstm, lstm4])
 
     #cool hidden
-    hidden_layer = Dense(256, activation='relu')(concatenated_smiley)
+    norm = BatchNormalization()(concatenated_smiley)
+    hidden_layer = Dense(256, activation='relu', kernel_constraint=max_norm(2.))(norm)
     dropout = Dropout(0.2)(hidden_layer)
 
     #output
