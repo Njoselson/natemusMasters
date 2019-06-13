@@ -1,0 +1,9 @@
+id	turn1	turn2	turn3	label
+0	You are such a good friend	Thanks!	😁	happy
+1	Why don’t you ever write me back?	Cause you’re a creep.	I know... I am... 😔  	sad
+2	I don’t get it… why can’t I ever get a date?	🙃 too ugly?	Screw you!	angry
+3	Too much pollution in the world	Or too many people…	Or both…	others
+4	You are such a good friend	Thanks!	I really fucking mean it! 😁	happy
+5	Why don’t you ever write me back?	Cause you’re a creep.	I know... I am...  	sad
+6	I don’t get it… why can’t I ever get a date?	🙃 too ugly?	Screw you! 😭	angry
+7	Too much pollution in the world 😭	Or too many people…	Or both…	others

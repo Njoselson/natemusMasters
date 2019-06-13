@@ -1,0 +1,1506 @@
+
+<!DOCTYPE html>
+<HTML>
+<HEAD>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    extensions: ["tex2jax.js"],
+    jax: ["input/LaTeX", "output/HTML-CSS"],
+    "HTML-CSS": { availableFonts: ["TeX"] }
+    });
+</script>
+
+<script type="text/javascript"
+    src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<style>
+
+@font-face {
+  font-family: 'Raleway';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Raleway Light'), local('Raleway-Light'), url(http://fonts.gstatic.com/s/raleway/v9/-_Ctzj9b56b8RgXW8FArifk_vArhqVIZ0nv9q090hN8.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Raleway';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Raleway'), url(http://fonts.gstatic.com/s/raleway/v9/0dTEPzkLWceF7z0koJaX1A.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Raleway';
+  font-style: normal;
+  font-weight: 600;
+  src: local('Raleway SemiBold'), local('Raleway-SemiBold'), url(http://fonts.gstatic.com/s/raleway/v9/xkvoNo9fC8O2RDydKj12b_k_vArhqVIZ0nv9q090hN8.woff2) format('woff2');
+}
+html {
+  font-family: sans-serif; /* 1 */
+  -ms-text-size-adjust: 100%; /* 2 */
+  -webkit-text-size-adjust: 100%; /* 2 */
+}
+body {
+  margin: 0;
+}
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+main,
+menu,
+nav,
+section,
+summary {
+  display: block;
+}
+audio,
+canvas,
+progress,
+video {
+  display: inline-block; /* 1 */
+  vertical-align: baseline; /* 2 */
+}
+audio:not([controls]) {
+  display: none;
+  height: 0;
+}
+[hidden],
+template {
+  display: none;
+}
+a:active,
+a:hover {
+  outline: 0;
+}
+abbr[title] {
+  border-bottom: 1px dotted;
+}
+b,
+strong {
+  font-weight: bold;
+}
+dfn {
+  font-style: italic;
+}
+h1 {
+  font-size: 2em;
+  margin: 0.67em 0;
+}
+mark {
+  background: #ff0;
+  color: #000;
+}
+small {
+  font-size: 80%;
+}
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+sup {
+  top: -0.5em;
+}
+sub {
+  bottom: -0.25em;
+}
+img {
+  border: 0;
+}
+svg:not(:root) {
+  overflow: hidden;
+}
+figure {
+  margin: 1em 40px;
+}
+hr {
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+  height: 0;
+}
+pre {
+  overflow: auto;
+}
+code,
+kbd,
+pre,
+samp {
+  font-family: monospace, monospace;
+  font-size: 1em;
+}
+button,
+input,
+optgroup,
+select,
+textarea {
+  color: inherit; /* 1 */
+  font: inherit; /* 2 */
+  margin: 0; /* 3 */
+}
+button {
+  overflow: visible;
+}
+button,
+select {
+  text-transform: none;
+}
+button,
+html input[type="button"], /* 1 */
+input[type="reset"],
+input[type="submit"] {
+  -webkit-appearance: button; /* 2 */
+  cursor: pointer; /* 3 */
+}
+button[disabled],
+html input[disabled] {
+  cursor: default;
+}
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+input {
+  line-height: normal;
+}
+input[type="checkbox"],
+input[type="radio"] {
+  box-sizing: border-box; /* 1 */
+  padding: 0; /* 2 */
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  height: auto;
+}
+input[type="search"] {
+  -webkit-appearance: textfield; /* 1 */
+  -moz-box-sizing: content-box;
+  -webkit-box-sizing: content-box; /* 2 */
+  box-sizing: content-box;
+}
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+fieldset {
+  border: 1px solid #c0c0c0;
+  margin: 0 2px;
+  padding: 0.35em 0.625em 0.75em;
+}
+legend {
+  border: 0; /* 1 */
+  padding: 0; /* 2 */
+}
+textarea {
+  overflow: auto;
+}
+optgroup {
+  font-weight: bold;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+td,
+th {
+  padding: 0;
+}
+
+
+/*
+* Skeleton V2.0.4
+* Copyright 2014, Dave Gamache
+* www.getskeleton.com
+* Free to use under the MIT license.
+* http://www.opensource.org/licenses/mit-license.php
+* 12/29/2014
+*/
+.container {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box; }
+.column,
+.columns {
+  width: 100%;
+  float: left;
+  box-sizing: border-box; }
+@media (min-width: 400px) {
+  .container {
+    width: 85%;
+    padding: 0; }
+}
+@media (min-width: 550px) {
+  .container {
+    width: 80%; }
+  .column,
+  .columns {
+    margin-left: 4%; }
+  .column:first-child,
+  .columns:first-child {
+    margin-left: 0; }
+
+  .one.column,
+  .one.columns                    { width: 4.66666666667%; }
+  .two.columns                    { width: 13.3333333333%; }
+  .three.columns                  { width: 22%;            }
+  .four.columns                   { width: 30.6666666667%; }
+  .five.columns                   { width: 39.3333333333%; }
+  .six.columns                    { width: 48%;            }
+  .seven.columns                  { width: 56.6666666667%; }
+  .eight.columns                  { width: 65.3333333333%; }
+  .nine.columns                   { width: 74.0%;          }
+  .ten.columns                    { width: 82.6666666667%; }
+  .eleven.columns                 { width: 91.3333333333%; }
+  .twelve.columns                 { width: 100%; margin-left: 0; }
+
+  .one-third.column               { width: 30.6666666667%; }
+  .two-thirds.column              { width: 65.3333333333%; }
+
+  .one-half.column                { width: 48%; }
+
+  /* Offsets */
+  .offset-by-one.column,
+  .offset-by-one.columns          { margin-left: 8.66666666667%; }
+  .offset-by-two.column,
+  .offset-by-two.columns          { margin-left: 17.3333333333%; }
+  .offset-by-three.column,
+  .offset-by-three.columns        { margin-left: 26%;            }
+  .offset-by-four.column,
+  .offset-by-four.columns         { margin-left: 34.6666666667%; }
+  .offset-by-five.column,
+  .offset-by-five.columns         { margin-left: 43.3333333333%; }
+  .offset-by-six.column,
+  .offset-by-six.columns          { margin-left: 52%;            }
+  .offset-by-seven.column,
+  .offset-by-seven.columns        { margin-left: 60.6666666667%; }
+  .offset-by-eight.column,
+  .offset-by-eight.columns        { margin-left: 69.3333333333%; }
+  .offset-by-nine.column,
+  .offset-by-nine.columns         { margin-left: 78.0%;          }
+  .offset-by-ten.column,
+  .offset-by-ten.columns          { margin-left: 86.6666666667%; }
+  .offset-by-eleven.column,
+  .offset-by-eleven.columns       { margin-left: 95.3333333333%; }
+
+  .offset-by-one-third.column,
+  .offset-by-one-third.columns    { margin-left: 34.6666666667%; }
+  .offset-by-two-thirds.column,
+  .offset-by-two-thirds.columns   { margin-left: 69.3333333333%; }
+
+  .offset-by-one-half.column,
+  .offset-by-one-half.columns     { margin-left: 52%; }
+
+}
+html {
+  font-size: 62.5%; }
+body {
+  font-size: 1.5em; /* currently ems cause chrome bug misinterpreting rems on body element */
+  line-height: 1.6;
+  font-weight: 400;
+  font-family: "Raleway", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #222; }
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  margin-bottom: 2rem;
+  font-weight: 300; }
+h1 { font-size: 3.6rem; line-height: 1.2;  letter-spacing: -.1rem;}
+h2 { font-size: 3.4rem; line-height: 1.25; letter-spacing: -.1rem; }
+h3 { font-size: 3.2rem; line-height: 1.3;  letter-spacing: -.1rem; }
+h4 { font-size: 2.8rem; line-height: 1.35; letter-spacing: -.08rem; }
+h5 { font-size: 2.4rem; line-height: 1.5;  letter-spacing: -.05rem; }
+h6 { font-size: 1.5rem; line-height: 1.6;  letter-spacing: 0; }
+
+p {
+  margin-top: 0; }
+a {
+  color: #1EAEDB; }
+a:hover {
+  color: #0FA0CE; }
+.button,
+button,
+input[type="submit"],
+input[type="reset"],
+input[type="button"] {
+  display: inline-block;
+  height: 38px;
+  padding: 0 30px;
+  color: #555;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 38px;
+  letter-spacing: .1rem;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: transparent;
+  border-radius: 4px;
+  border: 1px solid #bbb;
+  cursor: pointer;
+  box-sizing: border-box; }
+.button:hover,
+button:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover,
+input[type="button"]:hover,
+.button:focus,
+button:focus,
+input[type="submit"]:focus,
+input[type="reset"]:focus,
+input[type="button"]:focus {
+  color: #333;
+  border-color: #888;
+  outline: 0; }
+.button.button-primary,
+button.button-primary,
+input[type="submit"].button-primary,
+input[type="reset"].button-primary,
+input[type="button"].button-primary {
+  color: #FFF;
+  background-color: #33C3F0;
+  border-color: #33C3F0; }
+.button.button-primary:hover,
+button.button-primary:hover,
+input[type="submit"].button-primary:hover,
+input[type="reset"].button-primary:hover,
+input[type="button"].button-primary:hover,
+.button.button-primary:focus,
+button.button-primary:focus,
+input[type="submit"].button-primary:focus,
+input[type="reset"].button-primary:focus,
+input[type="button"].button-primary:focus {
+  color: #FFF;
+  background-color: #1EAEDB;
+  border-color: #1EAEDB; }
+input[type="email"],
+input[type="number"],
+input[type="search"],
+input[type="text"],
+input[type="tel"],
+input[type="url"],
+input[type="password"],
+textarea,
+select {
+  height: 38px;
+  padding: 6px 10px; /* The 6px vertically centers text on FF, ignored by Webkit */
+  background-color: #fff;
+  border: 1px solid #D1D1D1;
+  border-radius: 4px;
+  box-shadow: none;
+  box-sizing: border-box; }
+/* Removes awkward default styles on some inputs for iOS */
+input[type="email"],
+input[type="number"],
+input[type="search"],
+input[type="text"],
+input[type="tel"],
+input[type="url"],
+input[type="password"],
+textarea {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none; }
+textarea {
+  min-height: 65px;
+  padding-top: 6px;
+  padding-bottom: 6px; }
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+input[type="text"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus {
+  border: 1px solid #33C3F0;
+  outline: 0; }
+label,
+legend {
+  display: block;
+  margin-bottom: .5rem;
+  font-weight: 600; }
+fieldset {
+  padding: 0;
+  border-width: 0; }
+input[type="checkbox"],
+input[type="radio"] {
+  display: inline; }
+label > .label-body {
+  display: inline-block;
+  margin-left: .5rem;
+  font-weight: normal; }
+ul {
+  list-style: circle inside; }
+ol {
+  list-style: decimal inside; }
+ol, ul {
+  padding-left: 0;
+  margin-top: 0; }
+ul ul,
+ul ol,
+ol ol,
+ol ul {
+  margin: 1.5rem 0 1.5rem 3rem;
+  font-size: 90%; }
+li {
+  margin-bottom: 1rem; }
+th,
+td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #E1E1E1; }
+th:first-child,
+td:first-child {
+  padding-left: 0; }
+th:last-child,
+td:last-child {
+  padding-right: 0; }
+button,
+.button {
+  margin-bottom: 1rem; }
+input,
+textarea,
+select,
+fieldset {
+  margin-bottom: 1.5rem; }
+pre,
+blockquote,
+dl,
+figure,
+table,
+p,
+ul,
+ol,
+form {
+  margin-bottom: 2.5rem; }
+.u-full-width {
+  width: 100%;
+  box-sizing: border-box; }
+.u-max-full-width {
+  max-width: 100%;
+  box-sizing: border-box; }
+.u-pull-right {
+  float: right; }
+.u-pull-left {
+  float: left; }
+hr {
+  margin-top: 3rem;
+  margin-bottom: 3.5rem;
+  border-width: 0;
+  border-top: 1px solid #E1E1E1; }
+.container:after,
+.row:after,
+.u-cf {
+  content: "";
+  display: table;
+  clear: both; }
+
+pre {
+  display: block;
+  padding: 9.5px;
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.42857143;
+  color: #333;
+  word-break: break-all;
+  word-wrap: break-word;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+code,
+kbd,
+pre,
+samp {
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+code {
+  padding: 2px 4px;
+  font-size: 90%;
+  color: #c7254e;
+  background-color: #f9f2f4;
+  border-radius: 4px;
+}
+
+@media (min-width: 400px) {}
+@media (min-width: 550px) {}
+@media (min-width: 750px) {}
+@media (min-width: 1000px) {}
+@media (min-width: 1200px) {}
+
+</style>
+
+<style>
+.hll { background-color: #ffffcc }
+.c { color: #408080; font-style: italic } /* Comment */
+.err { border: 1px solid #FF0000 } /* Error */
+.k { color: #008000; font-weight: bold } /* Keyword */
+.o { color: #666666 } /* Operator */
+.ch { color: #408080; font-style: italic } /* Comment.Hashbang */
+.cm { color: #408080; font-style: italic } /* Comment.Multiline */
+.cp { color: #BC7A00 } /* Comment.Preproc */
+.cpf { color: #408080; font-style: italic } /* Comment.PreprocFile */
+.c1 { color: #408080; font-style: italic } /* Comment.Single */
+.cs { color: #408080; font-style: italic } /* Comment.Special */
+.gd { color: #A00000 } /* Generic.Deleted */
+.ge { font-style: italic } /* Generic.Emph */
+.gr { color: #FF0000 } /* Generic.Error */
+.gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.gi { color: #00A000 } /* Generic.Inserted */
+.go { color: #888888 } /* Generic.Output */
+.gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.gs { font-weight: bold } /* Generic.Strong */
+.gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.gt { color: #0044DD } /* Generic.Traceback */
+.kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.kp { color: #008000 } /* Keyword.Pseudo */
+.kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.kt { color: #B00040 } /* Keyword.Type */
+.m { color: #666666 } /* Literal.Number */
+.s { color: #BA2121 } /* Literal.String */
+.na { color: #7D9029 } /* Name.Attribute */
+.nb { color: #008000 } /* Name.Builtin */
+.nc { color: #0000FF; font-weight: bold } /* Name.Class */
+.no { color: #880000 } /* Name.Constant */
+.nd { color: #AA22FF } /* Name.Decorator */
+.ni { color: #999999; font-weight: bold } /* Name.Entity */
+.ne { color: #D2413A; font-weight: bold } /* Name.Exception */
+.nf { color: #0000FF } /* Name.Function */
+.nl { color: #A0A000 } /* Name.Label */
+.nn { color: #0000FF; font-weight: bold } /* Name.Namespace */
+.nt { color: #008000; font-weight: bold } /* Name.Tag */
+.nv { color: #19177C } /* Name.Variable */
+.ow { color: #AA22FF; font-weight: bold } /* Operator.Word */
+.w { color: #bbbbbb } /* Text.Whitespace */
+.mb { color: #666666 } /* Literal.Number.Bin */
+.mf { color: #666666 } /* Literal.Number.Float */
+.mh { color: #666666 } /* Literal.Number.Hex */
+.mi { color: #666666 } /* Literal.Number.Integer */
+.mo { color: #666666 } /* Literal.Number.Oct */
+.sa { color: #BA2121 } /* Literal.String.Affix */
+.sb { color: #BA2121 } /* Literal.String.Backtick */
+.sc { color: #BA2121 } /* Literal.String.Char */
+.dl { color: #BA2121 } /* Literal.String.Delimiter */
+.sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.s2 { color: #BA2121 } /* Literal.String.Double */
+.se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
+.sh { color: #BA2121 } /* Literal.String.Heredoc */
+.si { color: #BB6688; font-weight: bold } /* Literal.String.Interpol */
+.sx { color: #008000 } /* Literal.String.Other */
+.sr { color: #BB6688 } /* Literal.String.Regex */
+.s1 { color: #BA2121 } /* Literal.String.Single */
+.ss { color: #19177C } /* Literal.String.Symbol */
+.bp { color: #008000 } /* Name.Builtin.Pseudo */
+.fm { color: #0000FF } /* Name.Function.Magic */
+.vc { color: #19177C } /* Name.Variable.Class */
+.vg { color: #19177C } /* Name.Variable.Global */
+.vi { color: #19177C } /* Name.Variable.Instance */
+.vm { color: #19177C } /* Name.Variable.Magic */
+.il { color: #666666 } /* Literal.Number.Integer.Long */
+</style>
+
+
+
+
+
+<style>
+h1.title {margin-top : 20px}
+img {max-width : 100%}
+
+#From nbconvert
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-bold { font-weight: bold; }
+</style>
+
+</HEAD>
+<BODY>
+    <div class ="container">
+        <div class = "row">
+            <div class = "col-md-12 twelve columns">
+<h1>Smiley Separation Model</h1>
+<p>This is an improvement to our smiley separation
+which now takes the 3 turns as separate inputs
+into the LSTM layers.</p>
+
+<div class="highlight"><pre>
+Using TensorFlow backend.
+</pre></div>
+
+<div class="highlight"><pre>
+<span class="ansi-red-
+fg">---------------------------------------------------------------------------</span><span
+class="ansi-red-fg">KeyboardInterrupt</span>
+Traceback (most recent call last)<span class="ansi-green-
+fg">&lt;ipython-input-1-2ee1395a6dc6&gt;</span> in <span class="ansi-
+cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span
+class="ansi-green-fg">import</span> numpy <span class="ansi-green-
+fg">as</span> np
+<span class="ansi-green-intense-fg ansi-bold">      2</span> np<span
+class="ansi-blue-fg">.</span>random<span class="ansi-blue-
+fg">.</span>seed<span class="ansi-blue-fg">(</span><span class="ansi-
+cyan-fg">70</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-fg">----&gt; 3</span><span class="ansi-red-
+fg"> </span><span class="ansi-green-fg">from</span> keras<span
+class="ansi-blue-fg">.</span>preprocessing<span class="ansi-blue-
+fg">.</span>text <span class="ansi-green-fg">import</span> Tokenizer
+<span class="ansi-green-intense-fg ansi-bold">      4</span> <span
+class="ansi-green-fg">from</span> keras<span class="ansi-blue-
+fg">.</span>preprocessing<span class="ansi-blue-fg">.</span>sequence
+<span class="ansi-green-fg">import</span> pad_sequences
+<span class="ansi-green-intense-fg ansi-bold">      5</span> <span
+class="ansi-green-fg">from</span> keras<span class="ansi-blue-
+fg">.</span>utils <span class="ansi-green-fg">import</span>
+to_categorical
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/keras/__init__.py</span> in <span class="ansi-cyan-
+fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span
+class="ansi-green-fg">from</span> __future__ <span class="ansi-green-
+fg">import</span> absolute_import
+<span class="ansi-green-intense-fg ansi-bold">      2</span>
+<span class="ansi-green-fg">----&gt; 3</span><span class="ansi-red-
+fg"> </span><span class="ansi-green-fg">from</span> <span class="ansi-
+blue-fg">.</span> <span class="ansi-green-fg">import</span> utils
+<span class="ansi-green-intense-fg ansi-bold">      4</span> <span
+class="ansi-green-fg">from</span> <span class="ansi-blue-fg">.</span>
+<span class="ansi-green-fg">import</span> activations
+<span class="ansi-green-intense-fg ansi-bold">      5</span> <span
+class="ansi-green-fg">from</span> <span class="ansi-blue-fg">.</span>
+<span class="ansi-green-fg">import</span> applications
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/keras/utils/__init__.py</span> in <span class="ansi-cyan-
+fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> <span
+class="ansi-green-fg">from</span> <span class="ansi-blue-fg">.</span>
+<span class="ansi-green-fg">import</span> data_utils
+<span class="ansi-green-intense-fg ansi-bold">      5</span> <span
+class="ansi-green-fg">from</span> <span class="ansi-blue-fg">.</span>
+<span class="ansi-green-fg">import</span> io_utils
+<span class="ansi-green-fg">----&gt; 6</span><span class="ansi-red-
+fg"> </span><span class="ansi-green-fg">from</span> <span class="ansi-
+blue-fg">.</span> <span class="ansi-green-fg">import</span> conv_utils
+<span class="ansi-green-intense-fg ansi-bold">      7</span>
+<span class="ansi-green-intense-fg ansi-bold">      8</span> <span
+class="ansi-red-fg"># Globally-importable utils.</span>
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/keras/utils/conv_utils.py</span> in <span class="ansi-cyan-
+fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      7</span> <span
+class="ansi-green-fg">from</span> six<span class="ansi-blue-
+fg">.</span>moves <span class="ansi-green-fg">import</span> range
+<span class="ansi-green-intense-fg ansi-bold">      8</span> <span
+class="ansi-green-fg">import</span> numpy <span class="ansi-green-
+fg">as</span> np
+<span class="ansi-green-fg">----&gt; 9</span><span class="ansi-red-
+fg"> </span><span class="ansi-green-fg">from</span> <span class="ansi-
+blue-fg">.</span><span class="ansi-blue-fg">.</span> <span
+class="ansi-green-fg">import</span> backend <span class="ansi-green-
+fg">as</span> K
+<span class="ansi-green-intense-fg ansi-bold">     10</span>
+<span class="ansi-green-intense-fg ansi-bold">     11</span>
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/keras/backend/__init__.py</span> in <span class="ansi-cyan-
+fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">     87</span> <span
+class="ansi-green-fg">elif</span> _BACKEND <span class="ansi-blue-
+fg">==</span> <span class="ansi-blue-
+fg">&#39;tensorflow&#39;</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">     88</span>
+sys<span class="ansi-blue-fg">.</span>stderr<span class="ansi-blue-
+fg">.</span>write<span class="ansi-blue-fg">(</span><span class="ansi-
+blue-fg">&#39;Using TensorFlow backend.\n&#39;</span><span
+class="ansi-blue-fg">)</span>
+<span class="ansi-green-fg">---&gt; 89</span><span class="ansi-red-
+fg">     </span><span class="ansi-green-fg">from</span> <span
+class="ansi-blue-fg">.</span>tensorflow_backend <span class="ansi-
+green-fg">import</span> <span class="ansi-blue-fg">*</span>
+<span class="ansi-green-intense-fg ansi-bold">     90</span> <span
+class="ansi-green-fg">else</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">     91</span>     <span
+class="ansi-red-fg"># Try and load external backend.</span>
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/keras/backend/tensorflow_backend.py</span> in <span
+class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> <span
+class="ansi-green-fg">from</span> __future__ <span class="ansi-green-
+fg">import</span> print_function
+<span class="ansi-green-intense-fg ansi-bold">      4</span>
+<span class="ansi-green-fg">----&gt; 5</span><span class="ansi-red-
+fg"> </span><span class="ansi-green-fg">import</span> tensorflow <span
+class="ansi-green-fg">as</span> tf
+<span class="ansi-green-intense-fg ansi-bold">      6</span> <span
+class="ansi-green-fg">from</span> tensorflow<span class="ansi-blue-
+fg">.</span>python<span class="ansi-blue-fg">.</span>framework <span
+class="ansi-green-fg">import</span> ops <span class="ansi-green-
+fg">as</span> tf_ops
+<span class="ansi-green-intense-fg ansi-bold">      7</span> <span
+class="ansi-green-fg">from</span> tensorflow<span class="ansi-blue-
+fg">.</span>python<span class="ansi-blue-fg">.</span>training <span
+class="ansi-green-fg">import</span> moving_averages
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/tensorflow/__init__.py</span> in <span class="ansi-cyan-
+fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">     27</span> <span
+class="ansi-green-fg">from</span> tensorflow<span class="ansi-blue-
+fg">.</span>_api<span class="ansi-blue-fg">.</span>v1 <span
+class="ansi-green-fg">import</span> autograph
+<span class="ansi-green-intense-fg ansi-bold">     28</span> <span
+class="ansi-green-fg">from</span> tensorflow<span class="ansi-blue-
+fg">.</span>_api<span class="ansi-blue-fg">.</span>v1 <span
+class="ansi-green-fg">import</span> bitwise
+<span class="ansi-green-fg">---&gt; 29</span><span class="ansi-red-
+fg"> </span><span class="ansi-green-fg">from</span> tensorflow<span
+class="ansi-blue-fg">.</span>_api<span class="ansi-blue-fg">.</span>v1
+<span class="ansi-green-fg">import</span> compat
+<span class="ansi-green-intense-fg ansi-bold">     30</span> <span
+class="ansi-green-fg">from</span> tensorflow<span class="ansi-blue-
+fg">.</span>_api<span class="ansi-blue-fg">.</span>v1 <span
+class="ansi-green-fg">import</span> data
+<span class="ansi-green-intense-fg ansi-bold">     31</span> <span
+class="ansi-green-fg">from</span> tensorflow<span class="ansi-blue-
+fg">.</span>_api<span class="ansi-blue-fg">.</span>v1 <span
+class="ansi-green-fg">import</span> debugging
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/tensorflow/_api/v1/compat/__init__.py</span> in <span
+class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">     19</span> <span
+class="ansi-green-fg">from</span> __future__ <span class="ansi-green-
+fg">import</span> print_function <span class="ansi-green-fg">as</span>
+_print_function
+<span class="ansi-green-intense-fg ansi-bold">     20</span>
+<span class="ansi-green-fg">---&gt; 21</span><span class="ansi-red-
+fg"> </span><span class="ansi-green-fg">from</span> tensorflow<span
+class="ansi-blue-fg">.</span>_api<span class="ansi-blue-
+fg">.</span>v1<span class="ansi-blue-fg">.</span>compat <span
+class="ansi-green-fg">import</span> v1
+<span class="ansi-green-intense-fg ansi-bold">     22</span> <span
+class="ansi-green-fg">from</span> tensorflow<span class="ansi-blue-
+fg">.</span>python<span class="ansi-blue-fg">.</span>compat<span
+class="ansi-blue-fg">.</span>compat <span class="ansi-green-
+fg">import</span> forward_compatibility_horizon
+<span class="ansi-green-intense-fg ansi-bold">     23</span> <span
+class="ansi-green-fg">from</span> tensorflow<span class="ansi-blue-
+fg">.</span>python<span class="ansi-blue-fg">.</span>compat<span
+class="ansi-blue-fg">.</span>compat <span class="ansi-green-
+fg">import</span> forward_compatible
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/tensorflow/_api/v1/compat/v1/__init__.py</span> in <span
+class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">    624</span>
+_component_api_helper.package_hook(
+<span class="ansi-green-intense-fg ansi-bold">    625</span>
+parent_package_str<span class="ansi-blue-fg">=</span>__name__<span
+class="ansi-blue-fg">,</span>
+<span class="ansi-green-fg">--&gt; 626</span><span class="ansi-red-
+fg">
+child_package_str=(&#39;tensorflow_estimator.python.estimator.api.estimator&#39;))
+</span><span class="ansi-green-intense-fg ansi-bold">    627</span>
+<span class="ansi-green-intense-fg ansi-bold">    628</span> <span
+class="ansi-green-fg">from</span> tensorflow<span class="ansi-blue-
+fg">.</span>python<span class="ansi-blue-fg">.</span>platform <span
+class="ansi-green-fg">import</span> flags  <span class="ansi-red-fg">#
+pylint: disable=g-import-not-at-top</span>
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/tensorflow/python/tools/component_api_helper.py</span> in
+<span class="ansi-cyan-fg">package_hook</span><span class="ansi-blue-
+fg">(parent_package_str, child_package_str, error_msg)</span>
+<span class="ansi-green-intense-fg ansi-bold">     54</span>
+parent_pkg <span class="ansi-blue-fg">=</span> importlib<span
+class="ansi-blue-fg">.</span>import_module<span class="ansi-blue-
+fg">(</span>parent_package_str<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">     55</span>   <span
+class="ansi-green-fg">try</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-fg">---&gt; 56</span><span class="ansi-red-
+fg">     </span>child_pkg <span class="ansi-blue-fg">=</span>
+importlib<span class="ansi-blue-fg">.</span>import_module<span
+class="ansi-blue-fg">(</span>child_package_str<span class="ansi-blue-
+fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">     57</span>   <span
+class="ansi-green-fg">except</span> ImportError<span class="ansi-blue-
+fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">     58</span>     <span
+class="ansi-green-fg">if</span> error_msg<span class="ansi-blue-
+fg">:</span>
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/importlib/__init__.py</span>
+in <span class="ansi-cyan-fg">import_module</span><span class="ansi-
+blue-fg">(name, package)</span>
+<span class="ansi-green-intense-fg ansi-bold">    125</span>
+<span class="ansi-green-fg">break</span>
+<span class="ansi-green-intense-fg ansi-bold">    126</span>
+level <span class="ansi-blue-fg">+=</span> <span class="ansi-cyan-
+fg">1</span>
+<span class="ansi-green-fg">--&gt; 127</span><span class="ansi-red-
+fg">     </span><span class="ansi-green-fg">return</span>
+_bootstrap<span class="ansi-blue-fg">.</span>_gcd_import<span
+class="ansi-blue-fg">(</span>name<span class="ansi-blue-
+fg">[</span>level<span class="ansi-blue-fg">:</span><span class="ansi-
+blue-fg">]</span><span class="ansi-blue-fg">,</span> package<span
+class="ansi-blue-fg">,</span> level<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    128</span>
+<span class="ansi-green-intense-fg ansi-bold">    129</span>
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/tensorflow_estimator/__init__.py</span> in <span class="ansi-
+cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      6</span> <span
+class="ansi-green-fg">from</span> __future__ <span class="ansi-green-
+fg">import</span> print_function <span class="ansi-green-fg">as</span>
+_print_function
+<span class="ansi-green-intense-fg ansi-bold">      7</span>
+<span class="ansi-green-fg">----&gt; 8</span><span class="ansi-red-
+fg"> </span><span class="ansi-green-fg">from</span>
+tensorflow_estimator<span class="ansi-blue-fg">.</span>_api<span
+class="ansi-blue-fg">.</span>v1 <span class="ansi-green-
+fg">import</span> estimator
+<span class="ansi-green-intense-fg ansi-bold">      9</span>
+_names_with_underscore <span class="ansi-blue-fg">=</span> <span
+class="ansi-blue-fg">[</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-intense-fg ansi-bold">     10</span> __all__
+<span class="ansi-blue-fg">=</span> <span class="ansi-blue-
+fg">[</span>_s <span class="ansi-green-fg">for</span> _s <span
+class="ansi-green-fg">in</span> dir<span class="ansi-blue-
+fg">(</span><span class="ansi-blue-fg">)</span> <span class="ansi-
+green-fg">if</span> <span class="ansi-green-fg">not</span> _s<span
+class="ansi-blue-fg">.</span>startswith<span class="ansi-blue-
+fg">(</span><span class="ansi-blue-fg">&#39;_&#39;</span><span
+class="ansi-blue-fg">)</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/tensorflow_estimator/_api/v1/estimator/__init__.py</span> in
+<span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      6</span> <span
+class="ansi-green-fg">from</span> __future__ <span class="ansi-green-
+fg">import</span> print_function <span class="ansi-green-fg">as</span>
+_print_function
+<span class="ansi-green-intense-fg ansi-bold">      7</span>
+<span class="ansi-green-fg">----&gt; 8</span><span class="ansi-red-
+fg"> </span><span class="ansi-green-fg">from</span>
+tensorflow_estimator<span class="ansi-blue-fg">.</span>_api<span
+class="ansi-blue-fg">.</span>v1<span class="ansi-blue-
+fg">.</span>estimator <span class="ansi-green-fg">import</span>
+experimental
+<span class="ansi-green-intense-fg ansi-bold">      9</span> <span
+class="ansi-green-fg">from</span> tensorflow_estimator<span
+class="ansi-blue-fg">.</span>_api<span class="ansi-blue-
+fg">.</span>v1<span class="ansi-blue-fg">.</span>estimator <span
+class="ansi-green-fg">import</span> export
+<span class="ansi-green-intense-fg ansi-bold">     10</span> <span
+class="ansi-green-fg">from</span> tensorflow_estimator<span
+class="ansi-blue-fg">.</span>_api<span class="ansi-blue-
+fg">.</span>v1<span class="ansi-blue-fg">.</span>estimator <span
+class="ansi-green-fg">import</span> inputs
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/tensorflow_estimator/_api/v1/estimator/experimental/__init__.py</span>
+in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      6</span> <span
+class="ansi-green-fg">from</span> __future__ <span class="ansi-green-
+fg">import</span> print_function <span class="ansi-green-fg">as</span>
+_print_function
+<span class="ansi-green-intense-fg ansi-bold">      7</span>
+<span class="ansi-green-fg">----&gt; 8</span><span class="ansi-red-
+fg"> </span><span class="ansi-green-fg">from</span>
+tensorflow_estimator<span class="ansi-blue-fg">.</span>python<span
+class="ansi-blue-fg">.</span>estimator<span class="ansi-blue-
+fg">.</span>canned<span class="ansi-blue-fg">.</span>dnn <span
+class="ansi-green-fg">import</span> dnn_logit_fn_builder
+<span class="ansi-green-intense-fg ansi-bold">      9</span> <span
+class="ansi-green-fg">from</span> tensorflow_estimator<span
+class="ansi-blue-fg">.</span>python<span class="ansi-blue-
+fg">.</span>estimator<span class="ansi-blue-fg">.</span>canned<span
+class="ansi-blue-fg">.</span>linear <span class="ansi-green-
+fg">import</span> LinearSDCA
+<span class="ansi-green-intense-fg ansi-bold">     10</span> <span
+class="ansi-green-fg">from</span> tensorflow_estimator<span
+class="ansi-blue-fg">.</span>python<span class="ansi-blue-
+fg">.</span>estimator<span class="ansi-blue-fg">.</span>canned<span
+class="ansi-blue-fg">.</span>linear <span class="ansi-green-
+fg">import</span> linear_logit_fn_builder
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/tensorflow_estimator/python/estimator/__init__.py</span> in
+<span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">     23</span> <span
+class="ansi-green-fg">from</span> __future__ <span class="ansi-green-
+fg">import</span> print_function
+<span class="ansi-green-intense-fg ansi-bold">     24</span>
+<span class="ansi-green-fg">---&gt; 25</span><span class="ansi-red-
+fg"> </span><span class="ansi-green-fg">import</span>
+tensorflow_estimator<span class="ansi-blue-fg">.</span>python<span
+class="ansi-blue-fg">.</span>estimator<span class="ansi-blue-
+fg">.</span>estimator_lib
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/tensorflow_estimator/python/estimator/estimator_lib.py</span>
+in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">     51</span> <span
+class="ansi-green-fg">from</span> tensorflow_estimator<span
+class="ansi-blue-fg">.</span>python<span class="ansi-blue-
+fg">.</span>estimator<span class="ansi-blue-fg">.</span>hooks <span
+class="ansi-green-fg">import</span> hooks
+<span class="ansi-green-intense-fg ansi-bold">     52</span> <span
+class="ansi-green-fg">from</span> tensorflow_estimator<span
+class="ansi-blue-fg">.</span>python<span class="ansi-blue-
+fg">.</span>estimator<span class="ansi-blue-fg">.</span>hooks <span
+class="ansi-green-fg">import</span> session_run_hook
+<span class="ansi-green-fg">---&gt; 53</span><span class="ansi-red-
+fg"> </span><span class="ansi-green-fg">from</span>
+tensorflow_estimator<span class="ansi-blue-fg">.</span>python<span
+class="ansi-blue-fg">.</span>estimator<span class="ansi-blue-
+fg">.</span>inputs <span class="ansi-green-fg">import</span> inputs
+<span class="ansi-green-intense-fg ansi-bold">     54</span> <span
+class="ansi-green-fg">from</span> tensorflow_estimator<span
+class="ansi-blue-fg">.</span>python<span class="ansi-blue-
+fg">.</span>estimator<span class="ansi-blue-fg">.</span>keras <span
+class="ansi-green-fg">import</span> model_to_estimator
+<span class="ansi-green-intense-fg ansi-bold">     55</span> <span
+class="ansi-green-fg">from</span> tensorflow_estimator<span
+class="ansi-blue-fg">.</span>python<span class="ansi-blue-
+fg">.</span>estimator<span class="ansi-blue-fg">.</span>model_fn <span
+class="ansi-green-fg">import</span> call_logit_fn
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/tensorflow_estimator/python/estimator/inputs/inputs.py</span>
+in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">     20</span>
+<span class="ansi-green-intense-fg ansi-bold">     21</span> <span
+class="ansi-red-fg"># pylint: disable=unused-import,line-too-
+long</span>
+<span class="ansi-green-fg">---&gt; 22</span><span class="ansi-red-
+fg"> </span><span class="ansi-green-fg">from</span>
+tensorflow_estimator<span class="ansi-blue-fg">.</span>python<span
+class="ansi-blue-fg">.</span>estimator<span class="ansi-blue-
+fg">.</span>inputs<span class="ansi-blue-fg">.</span>numpy_io <span
+class="ansi-green-fg">import</span> numpy_input_fn
+<span class="ansi-green-intense-fg ansi-bold">     23</span> <span
+class="ansi-green-fg">from</span> tensorflow_estimator<span
+class="ansi-blue-fg">.</span>python<span class="ansi-blue-
+fg">.</span>estimator<span class="ansi-blue-fg">.</span>inputs<span
+class="ansi-blue-fg">.</span>pandas_io <span class="ansi-green-
+fg">import</span> pandas_input_fn
+<span class="ansi-green-intense-fg ansi-bold">     24</span>
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/tensorflow_estimator/python/estimator/inputs/numpy_io.py</span>
+in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">     24</span> <span
+class="ansi-green-fg">from</span> six <span class="ansi-green-
+fg">import</span> string_types
+<span class="ansi-green-intense-fg ansi-bold">     25</span>
+<span class="ansi-green-fg">---&gt; 26</span><span class="ansi-red-
+fg"> </span><span class="ansi-green-fg">from</span>
+tensorflow_estimator<span class="ansi-blue-fg">.</span>python<span
+class="ansi-blue-fg">.</span>estimator<span class="ansi-blue-
+fg">.</span>inputs<span class="ansi-blue-fg">.</span>queues <span
+class="ansi-green-fg">import</span> feeding_functions
+<span class="ansi-green-intense-fg ansi-bold">     27</span> <span
+class="ansi-green-fg">from</span> tensorflow<span class="ansi-blue-
+fg">.</span>python<span class="ansi-blue-fg">.</span>util<span
+class="ansi-blue-fg">.</span>tf_export <span class="ansi-green-
+fg">import</span> estimator_export
+<span class="ansi-green-intense-fg ansi-bold">     28</span>
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/tensorflow_estimator/python/estimator/inputs/queues/feeding_functions.py</span>
+in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">     38</span> <span
+class="ansi-green-fg">try</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">     39</span>   <span
+class="ansi-red-fg"># pylint: disable=g-import-not-at-top</span>
+<span class="ansi-green-fg">---&gt; 40</span><span class="ansi-red-
+fg">   </span><span class="ansi-green-fg">import</span> pandas <span
+class="ansi-green-fg">as</span> pd
+<span class="ansi-green-intense-fg ansi-bold">     41</span>
+HAS_PANDAS <span class="ansi-blue-fg">=</span> <span class="ansi-
+green-fg">True</span>
+<span class="ansi-green-intense-fg ansi-bold">     42</span> <span
+class="ansi-green-fg">except</span> IOError<span class="ansi-blue-
+fg">:</span>
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/pandas/__init__.py</span> in <span class="ansi-cyan-
+fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">     24</span>
+<span class="ansi-green-intense-fg ansi-bold">     25</span> <span
+class="ansi-green-fg">try</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-fg">---&gt; 26</span><span class="ansi-red-
+fg">     from pandas._libs import (hashtable as _hashtable,
+</span><span class="ansi-green-intense-fg ansi-bold">     27</span>
+lib <span class="ansi-green-fg">as</span> _lib<span class="ansi-blue-
+fg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">     28</span>
+tslib as _tslib)
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/pandas/_libs/__init__.py</span> in <span class="ansi-cyan-
+fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> <span
+class="ansi-red-fg"># flake8: noqa</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span>
+<span class="ansi-green-fg">----&gt; 4</span><span class="ansi-red-
+fg"> from .tslibs import (
+</span><span class="ansi-green-intense-fg ansi-bold">      5</span>
+iNaT, NaT, Timestamp, Timedelta, OutOfBoundsDatetime, Period)
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/pandas/_libs/tslibs/__init__.py</span> in <span class="ansi-
+cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> <span
+class="ansi-red-fg"># flake8: noqa</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span>
+<span class="ansi-green-fg">----&gt; 4</span><span class="ansi-red-
+fg"> </span><span class="ansi-green-fg">from</span> <span class="ansi-
+blue-fg">.</span>conversion <span class="ansi-green-fg">import</span>
+normalize_date<span class="ansi-blue-fg">,</span>
+localize_pydatetime<span class="ansi-blue-fg">,</span>
+tz_convert_single
+<span class="ansi-green-intense-fg ansi-bold">      5</span> <span
+class="ansi-green-fg">from</span> <span class="ansi-blue-
+fg">.</span>nattype <span class="ansi-green-fg">import</span> NaT<span
+class="ansi-blue-fg">,</span> iNaT<span class="ansi-blue-fg">,</span>
+is_null_datetimelike
+<span class="ansi-green-intense-fg ansi-bold">      6</span> <span
+class="ansi-green-fg">from</span> <span class="ansi-blue-
+fg">.</span>np_datetime <span class="ansi-green-fg">import</span>
+OutOfBoundsDatetime
+<span class="ansi-green-fg">pandas/_libs/tslibs/conversion.pyx</span>
+in <span class="ansi-cyan-fg">init
+pandas._libs.tslibs.conversion</span><span class="ansi-blue-
+fg">()</span>
+<span class="ansi-green-fg">pandas/_libs/tslibs/timedeltas.pyx</span>
+in <span class="ansi-cyan-fg">init
+pandas._libs.tslibs.timedeltas</span><span class="ansi-blue-
+fg">()</span>
+<span class="ansi-green-fg">pandas/_libs/tslibs/offsets.pyx</span> in
+<span class="ansi-cyan-fg">init
+pandas._libs.tslibs.offsets</span><span class="ansi-blue-fg">()</span>
+<span class="ansi-green-fg">pandas/_libs/tslibs/ccalendar.pyx</span>
+in <span class="ansi-cyan-fg">init
+pandas._libs.tslibs.ccalendar</span><span class="ansi-blue-
+fg">()</span>
+<span class="ansi-green-fg">pandas/_libs/tslibs/strptime.pyx</span> in
+<span class="ansi-cyan-fg">init
+pandas._libs.tslibs.strptime</span><span class="ansi-blue-
+fg">()</span>
+<span class="ansi-green-fg">pandas/_libs/tslibs/strptime.pyx</span> in
+<span class="ansi-cyan-
+fg">pandas._libs.tslibs.strptime.TimeRE.__init__</span><span
+class="ansi-blue-fg">()</span>
+<span class="ansi-green-fg">pandas/_libs/tslibs/strptime.pyx</span> in
+<span class="ansi-cyan-
+fg">pandas._libs.tslibs.strptime.TimeRE.__seqToRE</span><span
+class="ansi-blue-fg">()</span>
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/pytz/lazy.py</span> in <span class="ansi-cyan-
+fg">_lazy</span><span class="ansi-blue-fg">(self, *args, **kw)</span>
+<span class="ansi-green-intense-fg ansi-bold">     99</span>
+<span class="ansi-green-fg">try</span><span class="ansi-blue-
+fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">    100</span>
+<span class="ansi-green-fg">if</span> len<span class="ansi-blue-
+fg">(</span>fill_iter<span class="ansi-blue-fg">)</span> <span
+class="ansi-blue-fg">&gt;</span> <span class="ansi-cyan-
+fg">0</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-fg">--&gt; 101</span><span class="ansi-red-
+fg">                         </span>list<span class="ansi-blue-
+fg">.</span>extend<span class="ansi-blue-fg">(</span>self<span
+class="ansi-blue-fg">,</span> fill_iter<span class="ansi-blue-
+fg">.</span>pop<span class="ansi-blue-fg">(</span><span class="ansi-
+blue-fg">)</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    102</span>
+<span class="ansi-green-fg">for</span> method_name <span class="ansi-
+green-fg">in</span> cls<span class="ansi-blue-fg">.</span>_props<span
+class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">    103</span>
+delattr<span class="ansi-blue-fg">(</span>LazyList<span class="ansi-
+blue-fg">,</span> method_name<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/pytz/__init__.py</span> in <span class="ansi-cyan-
+fg">&lt;genexpr&gt;</span><span class="ansi-blue-fg">(.0)</span>
+<span class="ansi-green-intense-fg ansi-bold">   1080</span>
+&#39;Zulu&#39;]
+<span class="ansi-green-intense-fg ansi-bold">   1081</span>
+all_timezones = LazyList(
+<span class="ansi-green-fg">-&gt; 1082</span><span class="ansi-red-
+fg">         tz for tz in all_timezones if resource_exists(tz))
+</span><span class="ansi-green-intense-fg ansi-bold">   1083</span>
+<span class="ansi-green-intense-fg ansi-bold">   1084</span>
+all_timezones_set <span class="ansi-blue-fg">=</span> LazySet<span
+class="ansi-blue-fg">(</span>all_timezones<span class="ansi-blue-
+fg">)</span>
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/pytz/__init__.py</span> in <span class="ansi-cyan-
+fg">resource_exists</span><span class="ansi-blue-fg">(name)</span>
+<span class="ansi-green-intense-fg ansi-bold">    112</span>     <span
+class="ansi-blue-fg">&#34;&#34;&#34;Return true if the given resource
+exists&#34;&#34;&#34;</span>
+<span class="ansi-green-intense-fg ansi-bold">    113</span>     <span
+class="ansi-green-fg">try</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-fg">--&gt; 114</span><span class="ansi-red-
+fg">         </span>open_resource<span class="ansi-blue-
+fg">(</span>name<span class="ansi-blue-fg">)</span><span class="ansi-
+blue-fg">.</span>close<span class="ansi-blue-fg">(</span><span
+class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    115</span>
+<span class="ansi-green-fg">return</span> <span class="ansi-green-
+fg">True</span>
+<span class="ansi-green-intense-fg ansi-bold">    116</span>     <span
+class="ansi-green-fg">except</span> IOError<span class="ansi-blue-
+fg">:</span>
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-
+packages/pytz/__init__.py</span> in <span class="ansi-cyan-
+fg">open_resource</span><span class="ansi-blue-fg">(name)</span>
+<span class="ansi-green-intense-fg ansi-bold">     95</span>
+filename = os.path.join(os.path.dirname(__file__),
+<span class="ansi-green-intense-fg ansi-bold">     96</span>
+&#39;zoneinfo&#39;, *name_parts)
+<span class="ansi-green-fg">---&gt; 97</span><span class="ansi-red-
+fg">         </span><span class="ansi-green-fg">if</span> <span
+class="ansi-green-fg">not</span> os<span class="ansi-blue-
+fg">.</span>path<span class="ansi-blue-fg">.</span>exists<span
+class="ansi-blue-fg">(</span>filename<span class="ansi-blue-
+fg">)</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">     98</span>
+<span class="ansi-red-fg"># http://bugs.launchpad.net/bugs/383171 - we
+avoid using this</span>
+<span class="ansi-green-intense-fg ansi-bold">     99</span>
+<span class="ansi-red-fg"># unless absolutely necessary to help when a
+broken version of</span>
+<span class="ansi-green-
+fg">/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/genericpath.py</span>
+in <span class="ansi-cyan-fg">exists</span><span class="ansi-blue-
+fg">(path)</span>
+<span class="ansi-green-intense-fg ansi-bold">     17</span>     <span
+class="ansi-blue-fg">&#34;&#34;&#34;Test whether a path exists.
+Returns False for broken symbolic links&#34;&#34;&#34;</span>
+<span class="ansi-green-intense-fg ansi-bold">     18</span>     <span
+class="ansi-green-fg">try</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-fg">---&gt; 19</span><span class="ansi-red-
+fg">         </span>os<span class="ansi-blue-fg">.</span>stat<span
+class="ansi-blue-fg">(</span>path<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">     20</span>     <span
+class="ansi-green-fg">except</span> OSError<span class="ansi-blue-
+fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">     21</span>
+<span class="ansi-green-fg">return</span> <span class="ansi-green-
+fg">False</span>
+<span class="ansi-red-fg">KeyboardInterrupt</span>:
+</pre></div>
+
+<h2>Config</h2>
+<p>This model was produced with the following configs:</p>
+
+
+<h1>Model Specification</h1>
+<h1>An extra hidden layer which is supposed to extract the important information from the</h1>
+<h1>first embedding then add information from smilys</h1>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">buildModel</span><span class="p">(</span><span class="n">embeddingMatrix</span><span class="p">,</span> <span class="n">smileyEmbeddings</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Constructs the architecture of the model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#char_input = Input(shape=(None, None,))</span>
+    <span class="c1">#embedded_char = TimeDistributed(</span>
+    <span class="c1">#    Embedding(NB_CHARS + 2,</span>
+    <span class="c1">#              CHAR_EMBEDDING_DIM,</span>
+    <span class="c1">#              input_length=MAX_LEN_CHARS,</span>
+    <span class="c1">#              trainable=True,</span>
+    <span class="c1">#              mask_zero=True))(char_input)</span>
+    <span class="c1"># # character LSTM to get word encodings by characters</span>
+    <span class="c1">#char_encoding = TimeDistributed(</span>
+    <span class="c1">#    Bidirectional(LSTM(units=CHAR_UNITS,</span>
+    <span class="c1">#                       return_sequences=False,</span>
+    <span class="c1">#                       recurrent_dropout=CHAR_DROPOUT)))(embedded_char)</span>
+    <span class="c1">#word_input = Input(shape=(None,))</span>
+    <span class="c1">#embedded_word = Embedding(len(vocabulary_words) + 2,</span>
+    <span class="c1">#                          EMBEDDING_DIM,</span>
+    <span class="c1">#                          weights=[embedding_matrix],</span>
+    <span class="c1">#                          trainable=True,</span>
+    <span class="c1">#                          mask_zero=True)(word_input)</span>
+    <span class="c1">#model = concatenate([char_encoding, embedded_word])</span>
+    <span class="c1">#model = Dropout(DROPOUT)(model)</span>
+    <span class="c1">#model = Bidirectional(LSTM(LSTM_UNITS, return_sequences=True, recurrent_dropout=DROPOUT))(model)</span>
+    <span class="c1">#model = Dropout(DROPOUT)(model)</span>
+    <span class="c1">#model = Bidirectional(LSTM(LSTM_UNITS, return_sequences=True, recurrent_dropout=DROPOUT))(model)</span>
+    <span class="c1">#model = Dropout(DROPOUT)(model)</span>
+    <span class="c1">#out = Dense(len(ner) + 1, activation=&#39;softmax&#39;)(model)</span>
+    <span class="c1">#model = Model([char_input, word_input], out)</span>
+
+    <span class="c1">#Input layer 1</span>
+    <span class="n">char_input_1</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">MAX_SEQUENCE_LENGTH</span><span class="p">,</span> <span class="n">CHAR_MAX_LEN</span><span class="p">,))</span>
+    <span class="n">embedded_char_1</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span>
+       <span class="n">Embedding</span><span class="p">(</span><span class="mi">95</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="mi">32</span><span class="p">,</span>
+                 <span class="n">input_length</span><span class="o">=</span><span class="n">CHAR_MAX_LEN</span><span class="p">,</span>
+                 <span class="n">trainable</span><span class="o">=</span><span class="bp">True</span><span class="p">,))(</span><span class="n">char_input_1</span><span class="p">)</span>
+    <span class="c1">#character LSTM to get word encodings by characters</span>
+    <span class="n">char_encoding_1</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span>
+                       <span class="n">Bidirectional</span><span class="p">(</span><span class="n">LSTM</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+                                          <span class="n">return_sequences</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                                          <span class="n">recurrent_dropout</span><span class="o">=</span><span class="n">DROPOUT</span><span class="p">)))(</span><span class="n">embedded_char_1</span><span class="p">)</span>
+    <span class="n">word_input_1</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">MAX_SEQUENCE_LENGTH</span><span class="p">,))</span>
+    <span class="n">embedded_word_1</span> <span class="o">=</span> <span class="n">Embedding</span><span class="p">(</span><span class="n">embeddingMatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">EMBEDDING_DIM</span><span class="p">,</span>
+                             <span class="n">input_length</span><span class="o">=</span><span class="n">MAX_SEQUENCE_LENGTH</span><span class="p">,</span>
+                             <span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="n">embeddingMatrix</span><span class="p">],</span>
+                             <span class="n">trainable</span><span class="o">=</span><span class="bp">True</span><span class="p">)(</span><span class="n">word_input_1</span><span class="p">)</span>
+    <span class="c1"># sm_embedded_word_1 = Embedding(smileyEmbeddings.shape[0],</span>
+    <span class="c1">#                                300,</span>
+    <span class="c1">#                                input_length=MAX_SEQUENCE_LENGTH,</span>
+    <span class="c1">#                                weights=[smileyEmbeddings],</span>
+    <span class="c1">#                                trainable=True)(word_input_1)</span>
+    <span class="c1"># model_1 = concatenate([char_encoding_1, embedded_word_1, sm_embedded_word_1])</span>
+    <span class="n">model_1</span> <span class="o">=</span> <span class="n">concatenate</span><span class="p">([</span><span class="n">char_encoding_1</span><span class="p">,</span> <span class="n">embedded_word_1</span><span class="p">])</span>
+    <span class="n">model_1</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">DROPOUT</span><span class="p">)(</span><span class="n">model_1</span><span class="p">)</span>
+    <span class="n">lstm_1</span> <span class="o">=</span> <span class="n">Bidirectional</span><span class="p">(</span><span class="n">LSTM</span><span class="p">(</span><span class="n">LSTM_DIM</span><span class="p">,</span>
+                                <span class="n">return_sequences</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                <span class="n">recurrent_dropout</span><span class="o">=</span><span class="n">DROPOUT</span><span class="p">))(</span><span class="n">model_1</span><span class="p">)</span>
+    <span class="n">lstm_1</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">DROPOUT</span><span class="p">)(</span><span class="n">lstm_1</span><span class="p">)</span>
+    <span class="c1">#Input layer 2</span>
+    <span class="n">char_input_2</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">MAX_SEQUENCE_LENGTH</span><span class="p">,</span> <span class="n">CHAR_MAX_LEN</span><span class="p">,))</span>
+    <span class="n">embedded_char_2</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span>
+       <span class="n">Embedding</span><span class="p">(</span><span class="mi">95</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="mi">32</span><span class="p">,</span>
+                 <span class="n">input_length</span><span class="o">=</span><span class="n">CHAR_MAX_LEN</span><span class="p">,</span>
+                 <span class="n">trainable</span><span class="o">=</span><span class="bp">True</span><span class="p">))(</span><span class="n">char_input_2</span><span class="p">)</span>
+    <span class="c1">#character LSTM to get word encodings by characters</span>
+    <span class="n">char_encoding_2</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span>
+                       <span class="n">Bidirectional</span><span class="p">(</span><span class="n">LSTM</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+                                          <span class="n">return_sequences</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                                          <span class="n">recurrent_dropout</span><span class="o">=</span><span class="n">DROPOUT</span><span class="p">)))(</span><span class="n">embedded_char_2</span><span class="p">)</span>
+    <span class="n">word_input_2</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">MAX_SEQUENCE_LENGTH</span><span class="p">,))</span>
+    <span class="n">embedded_word_2</span> <span class="o">=</span> <span class="n">Embedding</span><span class="p">(</span><span class="n">embeddingMatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">EMBEDDING_DIM</span><span class="p">,</span>
+                             <span class="n">input_length</span><span class="o">=</span><span class="n">MAX_SEQUENCE_LENGTH</span><span class="p">,</span>
+                             <span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="n">embeddingMatrix</span><span class="p">],</span>
+                             <span class="n">trainable</span><span class="o">=</span><span class="bp">True</span><span class="p">)(</span><span class="n">word_input_2</span><span class="p">)</span>
+    <span class="c1"># sm_embedded_word_2 = Embedding(smileyEmbeddings.shape[0],</span>
+    <span class="c1">#                                300,</span>
+    <span class="c1">#                                input_length=MAX_SEQUENCE_LENGTH,</span>
+    <span class="c1">#                                weights=[smileyEmbeddings],</span>
+    <span class="c1">#                                trainable=True)(word_input_2)</span>
+    <span class="c1"># model_2 = concatenate([char_encoding_2, embedded_word_2,sm_embedded_word_2])</span>
+    <span class="n">model_2</span> <span class="o">=</span> <span class="n">concatenate</span><span class="p">([</span><span class="n">char_encoding_2</span><span class="p">,</span> <span class="n">embedded_word_2</span><span class="p">])</span>
+    <span class="n">model_2</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">DROPOUT</span><span class="p">)(</span><span class="n">model_2</span><span class="p">)</span>
+    <span class="n">lstm_2</span> <span class="o">=</span> <span class="n">Bidirectional</span><span class="p">(</span><span class="n">LSTM</span><span class="p">(</span><span class="n">LSTM_DIM</span><span class="p">,</span>
+                                <span class="n">return_sequences</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                <span class="n">recurrent_dropout</span><span class="o">=</span><span class="n">DROPOUT</span><span class="p">))(</span><span class="n">model_2</span><span class="p">)</span>
+    <span class="n">lstm_2</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">DROPOUT</span><span class="p">)(</span><span class="n">lstm_2</span><span class="p">)</span>
+    <span class="c1">#Input layer 3</span>
+    <span class="n">char_input_3</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">MAX_SEQUENCE_LENGTH</span><span class="p">,</span> <span class="n">CHAR_MAX_LEN</span><span class="p">,))</span>
+    <span class="n">embedded_char_3</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span>
+                       <span class="n">Embedding</span><span class="p">(</span><span class="mi">95</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
+                                 <span class="mi">32</span><span class="p">,</span>
+                                 <span class="n">input_length</span><span class="o">=</span><span class="n">CHAR_MAX_LEN</span><span class="p">,</span>
+                                 <span class="n">trainable</span><span class="o">=</span><span class="bp">True</span><span class="p">))(</span><span class="n">char_input_3</span><span class="p">)</span>
+    <span class="c1">#character LSTM to get word encodings by characters</span>
+    <span class="n">char_encoding_3</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span>
+                       <span class="n">Bidirectional</span><span class="p">(</span><span class="n">LSTM</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+                                          <span class="n">return_sequences</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                                          <span class="n">recurrent_dropout</span><span class="o">=</span><span class="n">DROPOUT</span><span class="p">)))(</span><span class="n">embedded_char_3</span><span class="p">)</span>
+    <span class="n">word_input_3</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">MAX_SEQUENCE_LENGTH</span><span class="p">,))</span>
+    <span class="n">embedded_word_3</span> <span class="o">=</span> <span class="n">Embedding</span><span class="p">(</span><span class="n">embeddingMatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">EMBEDDING_DIM</span><span class="p">,</span>
+                             <span class="n">input_length</span><span class="o">=</span><span class="n">MAX_SEQUENCE_LENGTH</span><span class="p">,</span>
+                             <span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="n">embeddingMatrix</span><span class="p">],</span>
+                             <span class="n">trainable</span><span class="o">=</span><span class="bp">True</span><span class="p">)(</span><span class="n">word_input_3</span><span class="p">)</span>
+    <span class="c1"># sm_embedded_word_3 = Embedding(smileyEmbeddings.shape[0],</span>
+    <span class="c1">#                                300,</span>
+    <span class="c1">#                                input_length=MAX_SEQUENCE_LENGTH,</span>
+    <span class="c1">#                                weights=[smileyEmbeddings],</span>
+    <span class="c1">#                                trainable=True)(word_input_3)</span>
+    <span class="c1"># model_3 = concatenate([char_encoding_3, embedded_word_3,sm_embedded_word_3])</span>
+    <span class="n">model_3</span> <span class="o">=</span> <span class="n">concatenate</span><span class="p">([</span><span class="n">char_encoding_3</span><span class="p">,</span> <span class="n">embedded_word_3</span><span class="p">])</span>
+    <span class="n">model_3</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">DROPOUT</span><span class="p">)(</span><span class="n">model_3</span><span class="p">)</span>
+    <span class="n">lstm_3</span> <span class="o">=</span> <span class="n">Bidirectional</span><span class="p">(</span><span class="n">LSTM</span><span class="p">(</span><span class="n">LSTM_DIM</span><span class="p">,</span>
+                                <span class="n">return_sequences</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                <span class="n">recurrent_dropout</span><span class="o">=</span><span class="n">DROPOUT</span><span class="p">))(</span><span class="n">model_3</span><span class="p">)</span>
+    <span class="n">lstm_3</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">DROPOUT</span><span class="p">)(</span><span class="n">lstm_3</span><span class="p">)</span>
+    <span class="c1">#Smiley inputs</span>
+    <span class="c1"># smiley_input = Input(shape=(20,), dtype=&#39;int32&#39;, name=&#39;main_input4&#39;)</span>
+    <span class="c1">#</span>
+    <span class="c1"># smileyEmbedding = Embedding(smileyEmbeddings.shape[0],</span>
+    <span class="c1">#                                  300,</span>
+    <span class="c1">#                                  weights=[smileyEmbeddings],</span>
+    <span class="c1">#                                  input_length=20,</span>
+    <span class="c1">#                                  trainable=True)(smiley_input)</span>
+    <span class="c1"># lstm_smiley = Bidirectional(LSTM(32,</span>
+    <span class="c1">#                                  dropout=DROPOUT,</span>
+    <span class="c1">#                                  return_sequences=True))(smileyEmbedding)</span>
+    <span class="c1"># lstm_smiley = Dropout(DROPOUT)(lstm_smiley)</span>
+    <span class="c1">#Concatenate all three LSTM layers and the smileys</span>
+    <span class="c1"># concatenated_output = Concatenate(axis=-2)([lstm_1,lstm_2,lstm_3,lstm_smiley])</span>
+    <span class="n">concatenated_output</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)([</span><span class="n">lstm_1</span><span class="p">,</span><span class="n">lstm_2</span><span class="p">,</span><span class="n">lstm_3</span><span class="p">])</span>
+    <span class="n">lstm_out</span> <span class="o">=</span> <span class="n">Bidirectional</span><span class="p">(</span><span class="n">LSTM</span><span class="p">(</span><span class="n">LSTM_DIM</span><span class="p">,</span>
+                                  <span class="n">return_sequences</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                                  <span class="n">recurrent_dropout</span><span class="o">=</span><span class="n">DROPOUT</span><span class="p">))(</span><span class="n">concatenated_output</span><span class="p">)</span>
+    <span class="n">lstm_out</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">DROPOUT</span><span class="p">)(</span><span class="n">lstm_out</span><span class="p">)</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;sigmoid&#39;</span><span class="p">)(</span><span class="n">lstm_out</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">([</span><span class="n">word_input_1</span><span class="p">,</span> <span class="n">word_input_2</span><span class="p">,</span> <span class="n">word_input_3</span><span class="p">,</span> <span class="n">char_input_1</span><span class="p">,</span> <span class="n">char_input_2</span><span class="p">,</span> <span class="n">char_input_3</span><span class="p">],</span> <span class="n">out</span><span class="p">)</span>
+    <span class="c1"># model = Model([word_input_1, word_input_2, word_input_3, smiley_input, char_input_1, char_input_2, char_input_3], out)</span>
+
+    <span class="c1"># char_input1 = Input(shape=(CHAR_MAX_LEN,None,))</span>
+    <span class="c1"># char_input2 = Input(shape=(CHAR_MAX_LEN,None,))</span>
+    <span class="c1"># char_input3 = Input(shape=(CHAR_MAX_LEN,None,))</span>
+    <span class="c1"># #Length of our tokenizer.word_index for chars is 95, inc UNK</span>
+    <span class="c1">#</span>
+    <span class="c1"># embedded_char = TimeDistributed(Embedding(95+1,</span>
+    <span class="c1">#                           CHAR_MAX_LEN,</span>
+    <span class="c1">#                           input_length=CHAR_MAX_LEN,</span>
+    <span class="c1">#                           trainable=True,</span>
+    <span class="c1">#                           mask_zero=True))</span>
+    <span class="c1">#</span>
+    <span class="c1"># embedded_char1 = embedded_char(char_input1)</span>
+    <span class="c1"># embedded_char2 = embedded_char(char_input2)</span>
+    <span class="c1"># embedded_char3 = embedded_char(char_input3)</span>
+    <span class="c1">#</span>
+    <span class="c1"># char_emb1 = TimeDistributed(Bidirectional(LSTM(units=32,</span>
+    <span class="c1">#                                                return_sequences=False,</span>
+    <span class="c1">#                                                recurrent_dropout=0.2)))(embedded_char1)</span>
+    <span class="c1"># char_emb2 = TimeDistributed(Bidirectional(LSTM(units=32,</span>
+    <span class="c1">#                                                return_sequences=False,</span>
+    <span class="c1">#                                                recurrent_dropout=0.2)))(embedded_char2)</span>
+    <span class="c1"># char_emb3 = TimeDistributed(Bidirectional(LSTM(units=32,</span>
+    <span class="c1">#                                                return_sequences=False,</span>
+    <span class="c1">#                                                recurrent_dropout=0.2)))(embedded_char3)</span>
+    <span class="c1">#</span>
+    <span class="c1"># x1 = Input(shape=(100,), dtype=&#39;int32&#39;, name=&#39;main_input1&#39;)</span>
+    <span class="c1"># x2 = Input(shape=(100,), dtype=&#39;int32&#39;, name=&#39;main_input2&#39;)</span>
+    <span class="c1"># x3 = Input(shape=(100,), dtype=&#39;int32&#39;, name=&#39;main_input3&#39;)</span>
+    <span class="c1"># #pretrained embedding layers</span>
+    <span class="c1"># embeddingLayer = Embedding(embeddingMatrix.shape[0],</span>
+    <span class="c1">#                             EMBEDDING_DIM,</span>
+    <span class="c1">#                             weights=[embeddingMatrix],</span>
+    <span class="c1">#                             input_length=MAX_SEQUENCE_LENGTH,</span>
+    <span class="c1">#                             trainable=True,</span>
+    <span class="c1">#                             mask_zero=True)</span>
+    <span class="c1"># emb1 = embeddingLayer(x1)</span>
+    <span class="c1"># emb2 = embeddingLayer(x2)</span>
+    <span class="c1"># emb3 = embeddingLayer(x3)</span>
+    <span class="c1">#</span>
+    <span class="c1"># inp1 = np.concatenate([char_emb1, emb1])</span>
+    <span class="c1"># inp2 = np.concatenate([char_emb2, emb2])</span>
+    <span class="c1"># inp3 = np.concatenate([char_emb3, emb3])</span>
+    <span class="c1">#</span>
+    <span class="c1"># smiley_input = Input(shape=(20,), dtype=&#39;int32&#39;, name=&#39;main_input4&#39;)</span>
+    <span class="c1">#</span>
+    <span class="c1"># smileyEmbeddingLayer = Embedding(smileyEmbeddings.shape[0],</span>
+    <span class="c1">#                                  300,</span>
+    <span class="c1">#                                  weights=[smileyEmbeddings],</span>
+    <span class="c1">#                                  input_length=20,</span>
+    <span class="c1">#                                  trainable=True,</span>
+    <span class="c1">#                                  mask_zero=True)</span>
+    <span class="c1">#</span>
+    <span class="c1"># #smiley embeddings</span>
+    <span class="c1"># emb_smiley = smileyEmbeddingLayer(smiley_input)</span>
+    <span class="c1">#</span>
+    <span class="c1"># #LSTM layers, need to define a new one for different embeddings</span>
+    <span class="c1"># lstm = Bidirectional(LSTM(LSTM_DIM, dropout=DROPOUT, return_sequences=True))</span>
+    <span class="c1"># lstm_char = Bidirectional(LSTM(LSTM_DIM, dropout=DROPOUT, return_sequences=True))</span>
+    <span class="c1"># lstm_smiley = LSTM(LSTM_DIM, dropout=DROPOUT)</span>
+    <span class="c1">#</span>
+    <span class="c1"># lstm1 = lstm(inp1)</span>
+    <span class="c1"># lstm2 = lstm(inp2)</span>
+    <span class="c1"># lstm3 = lstm(inp3)</span>
+    <span class="c1">#</span>
+    <span class="c1"># lstm4 = lstm_smiley(emb_smiley)</span>
+    <span class="c1">#</span>
+    <span class="c1"># #full network</span>
+    <span class="c1"># concatenated_lstm = Concatenate(axis=-1)([lstm1, lstm2, lstm3])</span>
+    <span class="c1"># reshaped_lstm_ = Flatten()(concatenated_lstm)</span>
+    <span class="c1"># reshaped_lstm = Dropout(DROPOUT)(reshaped_lstm_)</span>
+    <span class="c1">#</span>
+    <span class="c1"># #awesome char lstm</span>
+    <span class="c1"># concatenated_smiley_ = Concatenate(axis=-1)([reshaped_lstm, lstm4])</span>
+    <span class="c1"># concatenated_smiley = Dropout(DROPOUT)(concatenated_smiley_)</span>
+    <span class="c1">#</span>
+    <span class="c1">#</span>
+    <span class="c1"># #output</span>
+    <span class="c1"># model_output = Dense(4, activation=&#39;sigmoid&#39;)(concatenated_smiley)</span>
+    <span class="c1"># model = Model([x1, x2, x3, smiley_input, char_input1, char_input2, char_input3], model_output)</span>
+
+    <span class="n">adam</span> <span class="o">=</span>  <span class="n">optimizers</span><span class="o">.</span><span class="n">adam</span><span class="p">(</span><span class="n">lr</span><span class="o">=</span><span class="n">LEARNING_RATE</span><span class="p">)</span>
+
+    <span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="s1">&#39;categorical_crossentropy&#39;</span><span class="p">,</span>
+                  <span class="n">optimizer</span><span class="o">=</span><span class="n">adam</span><span class="p">,</span>
+                  <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">model</span>
+</pre></div>
+
+<h1>Model Training + Evaluation</h1>
+
+    <HR/>
+    <div class="footer">
+      <p>Published from <a href="bidir_model.py">bidir_model.py</a>
+    using <a href="http://mpastell.com/pweave">Pweave</a> 0.30.3
+    on 08-04-2019.<p></div>
+
+            </div>
+        </div>
+    </div>
+  </BODY>
+</HTML>
